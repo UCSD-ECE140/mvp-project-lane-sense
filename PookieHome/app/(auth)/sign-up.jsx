@@ -41,8 +41,6 @@ const SignUp = () => {
                         minHeight: Dimensions.get("window").height - 100,
                     }}
                 >
-
-
                     <Text className="text-2xl font-semibold text-black mt-10 font-psemibold">
                         Sign Up to Pookie
                     </Text>

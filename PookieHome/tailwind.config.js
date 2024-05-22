@@ -7,11 +7,12 @@ module.exports = {
         primary: '#OOC2FF',
         "custom-yellow": '#FFE604',
         "pastel-blue": '#ADD8E6', // Light Blue
+        "pastel-orange": '#FFB054',
       }
     },
     keyframes: {
       shimmer: {
-        '0%': { backgroundPosition: '0% 50%' },
+        '0%': { backgroundPosition: '0% 50%'},
         '100%': { backgroundPosition: '100% 50%' },
       },
     },
