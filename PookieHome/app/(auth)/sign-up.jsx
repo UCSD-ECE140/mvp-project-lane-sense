@@ -2,46 +2,25 @@ import {useState} from "react";
 import {Link, router} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {View, Text, ScrollView, Dimensions, Alert} from "react-native";
-import * as SecureStore from 'expo-secure-store';
 
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/Custom Button";
 
-import { API_BASE_URL } from "@env";
 
 const createUser = async (email, password, username) => {
-    console.log(API_BASE_URL);
-    const response = await fetch(`${API_BASE_URL}/user/create`, {
+    console.log(process.env.EXPO_PUBLIC_BACKEND_URL);
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/user/create`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            username,
-            email,
-            password,
-        }),
+        body: JSON.stringify({email, password, username}),
     });
-    if (!response.ok) {
-        throw new Error("An error occurred while creating your account");
-    }
-    return await response.json();
-}
 
-const verifyToken = async (access_token) => {
-    console.log(access_token);
-    const response = await fetch(`${API_BASE_URL}/token/verify`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            access_token,
-        }),
-    });
     if (!response.ok) {
-        throw new Error("An error occurred while verifying your account");
+        throw new Error("An error occurred while signing up");
     }
+``
     return await response.json();
 }
 
@@ -55,17 +34,14 @@ const SignUp = () => {
         if (form.username === "" || form.email === "" || form.password === "") {
             Alert.alert("Error", "Please fill in all fields");
         }
+
         setSubmitting(true);
         try {
             const result = await createUser(form.email, form.password, form.username);
+            //setUser(result);
+            //setIsLogged(true);
             console.log(result);
-            // verify token
-            let validationResult = await verifyToken(result.access_token);
-            if (validationResult.valid) {
-                // A way to store the token securely
-                await SecureStore.setItemAsync('token', result.access_token);
-                router.replace("/profile");
-            }
+            router.replace("/sign-in");
         } catch (error) {
             Alert.alert("Error", error.message);
         } finally {
