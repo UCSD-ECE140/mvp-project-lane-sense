@@ -6,6 +6,8 @@ import {Link} from "expo-router"
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/Custom Button";
 
+import * as SecureStore from "expo-secure-store";
+
 const loginUser = async (email, password) => {
     const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/user/login`, {
         method: "POST",
@@ -36,7 +38,11 @@ const SignIn = () => {
             return;
         }
         let result = await loginUser(form.email, form.password);
-        console.log(result);
+        // login result should have {"access_token": access_token, "token_type": "bearer"}
+        let token = result.access_token;
+        // store
+        await SecureStore.setItemAsync("token", token);
+        console.log("token stored: ", await SecureStore.getItemAsync("token"));
         
     }
 
