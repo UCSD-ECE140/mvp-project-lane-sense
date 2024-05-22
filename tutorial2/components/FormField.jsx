@@ -1,15 +1,18 @@
 import {View, Text, TextInput, TouchableOpacity} from 'react-native';
 import {useState} from 'react';
 
-const FormField = ({title,
-                   value, placeholder,
-                   handleChangeText,
-                   otherStyles,
-                   keyboardType,
-                   ...props}) => {
+const FormField = ({
+                       title,
+                       value, placeholder,
+                       handleChangeText,
+                       otherStyles,
+                       keyboardType,
+                       ...props
+                   }) => {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
+
         <View className={`space-y-2 ${otherStyles}`}>
             <Text className="text-base text-blue-800 font-pmedium">{title}</Text>
             <View
@@ -30,7 +33,6 @@ const FormField = ({title,
                     </TouchableOpacity>)}
             </View>
         </View>
-
     )
 }
 
