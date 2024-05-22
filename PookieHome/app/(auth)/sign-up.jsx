@@ -9,7 +9,7 @@ import CustomButton from "../../components/Custom Button";
 
 const createUser = async (email, password, username) => {
     console.log(process.env.EXPO_PUBLIC_BACKEND_URL);
-    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/sign-up`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/user/create`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

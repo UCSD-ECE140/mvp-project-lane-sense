@@ -1,7 +1,7 @@
-import {View, Text, ScrollView} from 'react-native';
+import {View, Text, ScrollView, Alert} from 'react-native';
 import {useState} from 'react';
 import {SafeAreaView} from "react-native-safe-area-context";
-import {Link} from "expo-router"
+import {Link, router} from "expo-router"
 
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/Custom Button";
@@ -43,7 +43,8 @@ const SignIn = () => {
         // store
         await SecureStore.setItemAsync("token", token);
         console.log("token stored: ", await SecureStore.getItemAsync("token"));
-        
+        Alert.alert("Success", "You have successfully logged in");
+        router.replace("/profile");
     }
 
 

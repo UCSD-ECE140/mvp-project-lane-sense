@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles                 # Used for serving s
 import uvicorn                                              # Used for running the app                                             
 
 from models import Token, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
-from security import authenticate_user, create_access_token, verify_token
+from security import authenticate_user, create_access_token, get_current_user, verify_token
 from users import create_user, get_stats, login_user, update_user_stats
 from trips import add_location_update, complete_trip, create_trip, trip_details, trip_route, user_trips, users_latest_trip
 from friends import accept_friend_request, reject_friend_request, send_friend_request
@@ -42,8 +42,8 @@ async def verify_token_endpoint(token: Token):
     return JSONResponse(content={"valid": result})
 
 # Get user stats
-@app.get("/user/{user_id}/stats", response_model=UserStats)
-async def get_user_stats(user_id: int):
+@app.get("/user/stats", response_model=UserStats)
+async def get_user_stats(user_id: int = Depends(get_current_user)):
     stats = get_stats(user_id)
     return stats
 
