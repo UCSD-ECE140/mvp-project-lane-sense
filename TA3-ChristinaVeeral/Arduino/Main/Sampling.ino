@@ -1,4 +1,4 @@
-int sampleRate = 50;                  // Sensor reading Frequency (Hz)
+/*int sampleRate = 50;                  // Sensor reading Frequency (Hz)
 unsigned long sampleDelay = 1e6/sampleRate; //Time(μs) between samples
 unsigned long timeStart = 0;              //Start time timing variable
 unsigned long timeEnd = 0;                  //End time timing variable
@@ -41,3 +41,4 @@ void displaySampleRate(unsigned long currentTime) {
 
 
 
+*/

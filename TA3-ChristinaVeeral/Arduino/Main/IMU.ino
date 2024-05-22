@@ -1,4 +1,4 @@
-// Define the pin constants
+/*// Define the pin constants
 const int X_PIN = A0;
 const int Y_PIN = A1;
 const int Z_PIN = A2;
@@ -20,3 +20,4 @@ void readAccelSensor() {
     ay = analogRead(Y_PIN);
     az = analogRead(Z_PIN);
 }
+*/

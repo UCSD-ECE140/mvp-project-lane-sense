@@ -8,7 +8,7 @@ class Communication:
   '''
   Encapsulated class attributes (with default values)
   '''
-  __serial_name = "/dev/cu.usbserial-1460"
+  __serial_name = "/dev/cu.usbserial-0001"
   __baud_rate = 115200
   __ser = None
 
@@ -48,7 +48,8 @@ class Communication:
     At 50Hz sampling and baud rate of 115200, the limit is 288 bytes/sample
     115200 b/s == 14400 B/s == (14400 B/s)/(50 s/sample) = 288 bytes/sample
   '''
-  def receive_message(self,num_bytes=50):
+  def receive_message(self,num_bytes=8):
+    #print("I am decoding")
     if(self.__ser.in_waiting > 0):
       return self.__ser.readline(num_bytes).decode('utf-8')
     else:

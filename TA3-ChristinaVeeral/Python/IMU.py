@@ -3,7 +3,6 @@ from CommLib.CircularList import CircularList
 from matplotlib import pyplot as plt
 from time import time, sleep
 import numpy as np
-from math import sqrt
 
 if __name__ == "__main__":
     # Configuration
@@ -15,6 +14,14 @@ if __name__ == "__main__":
     ax = CircularList([], num_samples)
     ay = CircularList([], num_samples)
     az = CircularList([], num_samples)
+    gx = CircularList([], num_samples)
+    gy = CircularList([], num_samples)
+    gz = CircularList([], num_samples)
+    mx = CircularList([], num_samples)
+    my = CircularList([], num_samples)
+    mz = CircularList([], num_samples)
+    temperature = CircularList([], num_samples)
+    
     running_avg_ax = CircularList([], num_samples)
     running_avg_ay = CircularList([], num_samples)
     running_avg_az = CircularList([], num_samples)
@@ -24,103 +31,78 @@ if __name__ == "__main__":
     custom_transform = CircularList([], num_samples)
 
     # Communication setup
-    comms = Communication("/dev/cu.usbserial-1460", 115200)
+    comms = Communication("/dev/cu.usbserial-0001", 115200)
     sleep(3)
-    comms.clear()                   # just in case any junk is in the pipes
-    comms.send_message("wearable")  # begin sending data
-
+    #comms.clear()                   # just in case any junk is in the pipes
+    
     try:
         previous_time = 0
         while(True):
             message = comms.receive_message()
-            if(message != None):
+            print(message)
+            if message is not None:
                 try:
-                    (m1, m2, m3, m4) = message.split(',')
+                    parts = message.split(',')
+                    (timestamp, ax_value, ay_value, az_value,
+                     gx_value, gy_value, gz_value,
+                     mx_value, my_value, mz_value,
+                     temperature_value) = parts
+                    timestamp = float(timestamp)
+                    ax_value = float(ax_value)
+                    ay_value = float(ay_value)
+                    az_value = float(az_value)
+                    gx_value = float(gx_value)
+                    gy_value = float(gy_value)
+                    gz_value = float(gz_value)
+                    mx_value = float(mx_value)
+                    my_value = float(my_value)
+                    mz_value = float(mz_value)
+                    temperature_value = float(temperature_value)
                 except ValueError:        # if corrupted data, skip the sample
                     continue
 
                 # add the new values to the circular lists
-                times.add(int(m1)/1000)
-                ax.add(int(m2))
-                ay.add(int(m3))
-                az.add(int(m4))
+                times.add(timestamp / 1000)
+                ax.add(ax_value)
+                ay.add(ay_value)
+                az.add(az_value)
+                gx.add(gx_value)
+                gy.add(gy_value)
+                gz.add(gz_value)
+                mx.add(mx_value)
+                my.add(my_value)
+                mz.add(mz_value)
+                temperature.add(temperature_value)
 
-                running_avg_ax.add(np.mean(ax))
-                running_avg_ay.add(np.mean(ay))
-                running_avg_az.add(np.mean(az))
-
-                # Calculate sample differences
-                if len(ax) >= 2 and len(ay) >= 2 and len(az) >= 2:
-                    sample_diff_data = np.diff(np.array([ax[-1], ay[-1], az[-1]])).tolist()
-                    sample_diff.add(sample_diff_data)
-                else:
-                    sample_diff.add([0, 0, 0])  # Add placeholder if there are not enough samples for diff calculation
-
-                # Calculate L2 norm
-                l2_norm_data = sqrt(ax[-1]**2 + ay[-1]**2 + az[-1]**2)
-                l2_norm.add(l2_norm_data)
-
-                # Calculate L1 norm
-                l1_norm_data = abs(ax[-1]) + abs(ay[-1]) + abs(az[-1])
-                l1_norm.add(l1_norm_data)
-
-                # Calculate custom transformation
-                custom_transform_data = ax[-1] * ay[-1]
-                custom_transform.add(custom_transform_data)
-
-                # if enough time has elapsed, clear the axis, and plot az
+                # if enough time has elapsed, clear the axis, and plot data
                 current_time = time()
                 if (current_time - previous_time > refresh_time):
                     previous_time = current_time
                     plt.cla()
                     plt.clf()
                     
-                    # Original data
-                    plt.subplot(3, 2, 1)
-                    plt.plot(times, ax, label='ax', color='blue')  # Specify blue color
-                    plt.plot(times, ay, label='ay', color='red')   # Specify red color
-                    plt.plot(times, az, label='az', color='green') # Specify green color
+                    # Original data plotting (example with az)
+                    plt.plot(times.data, ax.data, label='ax')
+                    plt.plot(times.data, ay.data, label='ay')
+                    plt.plot(times.data, az.data, label='az')
+                    
+                    #Add more plots for other variables if needed
+                    plt.plot(times.data, ax.data, label='ax')
+                    plt.plot(times.data, ay.data, label='ay')
+                    plt.plot(times.data, gx.data, label='gx')
+                    plt.plot(times.data, gy.data, label='gy')
+                    plt.plot(times.data, gz.data, label='gz')
+                    plt.plot(times.data, mx.data, label='mx')
+                    plt.plot(times.data, my.data, label='my')
+                    plt.plot(times.data, mz.data, label='mz')
+                    plt.plot(times.data, temperature.data, label='temperature')
+
                     plt.legend()
-                    plt.title('Original Data')
-
-                    # Running averages
-                    plt.subplot(3, 2, 2)
-                    plt.plot(times, running_avg_ax, label='Avg ax', color='blue')  # Specify blue color
-                    plt.plot(times, running_avg_ay, label='Avg ay', color='red')   # Specify red color
-                    plt.plot(times, running_avg_az, label='Avg az', color='green') # Specify green color
-                    plt.legend()
-                    plt.title('Running Averages')
-
-                    # Sample difference
-                    plt.subplot(3, 2, 3)
-                    plt.plot(times[:len(sample_diff)], sample_diff, label='Sample Difference', color='purple')
-                    plt.title('Sample Difference')
-
-                    # L2 norm
-                    plt.subplot(3, 2, 4)
-                    plt.plot(times, l2_norm, label='L2 Norm', color='orange')  # Specify orange color
-                    plt.legend()
-                    plt.title('L2 Norm')
-
-                    # L1 norm
-                    plt.subplot(3, 2, 5)
-                    plt.plot(times, l1_norm, label='L1 Norm', color='cyan')  # Specify cyan color
-                    plt.legend()
-                    plt.title('L1 Norm')
-
-                    # Custom transformation
-                    plt.subplot(3, 2, 6)
-                    plt.plot(times, custom_transform, label='Custom Transform', color='magenta')  # Specify magenta color
-                    plt.legend()
-                    plt.title('Custom Transformation')
-
-                    plt.xlabel('')
-                    plt.ylabel('')
-                    plt.show(block=False)
+                    plt.draw()
                     plt.pause(0.001)
 
     except(Exception, KeyboardInterrupt) as e:
         print(e)                     # Exiting the program due to exception
     finally:
-        comms.send_message("sleep")  # stop sending data
+        #comms.send_message("sleep")  # stop sending data
         comms.close()

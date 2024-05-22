@@ -1,62 +1,75 @@
-int sampleTime = 0; // Time of last sample (in Sampling tab)
-// Acceleration values recorded from the readAccelSensor() function
-int ax = 0; 
-int ay = 0; 
-int az = 0;
-bool sending; // Flag indicating whether data is being sent
-float timer = 0; // Timer variable for timing purposes
-unsigned long previoustimer; // Previous timer value for comparison
-bool setupActive; // Flag indicating whether setup is active
+#include <Arduino.h>
+#include <Wire.h>
+#include "MPU9250.h"
+#include <SPI.h>
+
+MPU9250 mpu;
 
 void setup() {
-  // Initialize components and setup
-  setupAccelSensor(); // Initialize accelerometer sensor
-  setupCommunication(); // Initialize communication
-  setupDisplay(); // Initialize display
-  setupMotor(); // Initialize motor
-  sending = false; // Set sending flag to false
-  setupActive = true; // Set setup active flag to true
-  writeDisplay("Sleep", 0, true); // Write "Sleep" message to display
+    Serial.begin(115200);
+    Wire.begin(21, 22); // Change these pins if needed
+    delay(2000);
+
+    if (!mpu.setup(0x68)) {  // Change to your own address
+        while (1) {
+            sendMessage("MPU connection failed. Please check your connection with `connection_check` example.");
+            delay(5000);
+        }
+    }
 }
 
 void loop() {
-  // Receive commands and respond accordingly
-  String command = receiveMessage(); // Receive command from communication
-  if (command == "sleep") {
-    // Handle sleep command
-    sending = false; // Stop sending data
-    writeDisplay("Sleep", 0, true); // Write "Sleep" message to display
-    deactivateMotor(); // Deactivate motor
-  
-  } else if (command == "wearable") {
-    // Handle wearable command
-    sending = true; // Start sending data
-    writeDisplay("Wearable", 0, true); // Write "Wearable" message to displ           ay
-    deactivateMotor(); // Deactivate motor
- 
-  } else if (command == "Person has been inactive for 5 or more seconds") {
-    // Handle inactive command
-    writeDisplay("Inactive", 0, true); // Write "Inactive" message to display
-    if (setupActive) {
-      // If setup is active, activate motor for 1 second
-      unsigned long start = millis(); // Get current time
-      activateMotor(255); // Activate motor at full power
-      while (millis() - start < 1000) {
-          // Wait for 1 second
-      }
-      deactivateMotor(); // Deactivate motor after 1 second
-    }  
-  } else if (command == "Person is active again.") {
-    // Handle active command
-    sending = true; // Start sending data
-    writeDisplay("Active", 0, true); // Write "Active" message to display
-    deactivateMotor(); // Deactivate motor
-  }
+    if (mpu.update()) {
+        static uint32_t prev_ms = millis();
+        if (millis() > prev_ms + 25) {
+            send_sensor_data();
+            prev_ms = millis();
+        }
+    }
+}
 
-  // If sending data and sensors are sampled successfully, send data
-  if (sending && sampleSensors()) {
-    // Create response string with sensor data
-    String response = String(sampleTime) + "," + String(ax) + "," + String(ay) + "," + String(az) + "\n";
-    sendMessage(response); // Send response message via communication
-  }
+void send_sensor_data() {
+    String response = String("Accel X: ") + String(mpu.getAccX(), 2) + ", " +
+                      String("Accel Y: ") + String(mpu.getAccY(), 2) + ", " +
+                      String("Accel Z: ") + String(mpu.getAccZ(), 2) + ", " +
+                      String("Gyro X: ") + String(mpu.getGyroX(), 2) + ", " +
+                      String("Gyro Y: ") + String(mpu.getGyroY(), 2) + ", " +
+                      String("Gyro Z: ") + String(mpu.getGyroZ(), 2) + ", " +
+                      String("Mag X: ") + String(mpu.getMagX(), 2) + ", " +
+                      String("Mag Y: ") + String(mpu.getMagY(), 2) + ", " +
+                      String("Mag Z: ") + String(mpu.getMagZ(), 2) + ", " +
+                      String("Temperature: ") + String(mpu.getTemperature(), 2) + " °C\n";
+    sendMessage(response);
+}
+
+void print_calibration() {
+    Serial.println("< Calibration Parameters >");
+    Serial.println("Accel Bias [mg]: ");
+    Serial.print(mpu.getAccBiasX() * 1000.f / (float)MPU9250::CALIB_ACCEL_SENSITIVITY);
+    Serial.print(", ");
+    Serial.print(mpu.getAccBiasY() * 1000.f / (float)MPU9250::CALIB_ACCEL_SENSITIVITY);
+    Serial.print(", ");
+    Serial.print(mpu.getAccBiasZ() * 1000.f / (float)MPU9250::CALIB_ACCEL_SENSITIVITY);
+    Serial.println();
+    Serial.println("Gyro Bias [deg/s]: ");
+    Serial.print(mpu.getGyroBiasX() / (float)MPU9250::CALIB_GYRO_SENSITIVITY);
+    Serial.print(", ");
+    Serial.print(mpu.getGyroBiasY() / (float)MPU9250::CALIB_GYRO_SENSITIVITY);
+    Serial.print(", ");
+    Serial.print(mpu.getGyroBiasZ() / (float)MPU9250::CALIB_GYRO_SENSITIVITY);
+    Serial.println();
+    Serial.println("Mag Bias [mG]: ");
+    Serial.print(mpu.getMagBiasX());
+    Serial.print(", ");
+    Serial.print(mpu.getMagBiasY());
+    Serial.print(", ");
+    Serial.print(mpu.getMagBiasZ());
+    Serial.println();
+    Serial.println("Mag Scale []: ");
+    Serial.print(mpu.getMagScaleX());
+    Serial.print(", ");
+    Serial.print(mpu.getMagScaleY());
+    Serial.print(", ");
+    Serial.print(mpu.getMagScaleZ());
+    Serial.println();
 }
