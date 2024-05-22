@@ -6,6 +6,22 @@ import {Link} from "expo-router"
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/Custom Button";
 
+const loginUser = async (email, password) => {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/user/login`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, password}),
+    });
+
+    if (!response.ok) {
+        throw new Error("An error occurred while signing in");
+    }
+
+    return await response.json();
+}
+
 const SignIn = () => {
     const [form, setForm] = useState({
         email: "",
@@ -14,7 +30,14 @@ const SignIn = () => {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const submit = () => {
+    const submit = async () => {
+        if (form.email === "" || form.password === "") {
+            Alert.alert("Error", "Please fill in all fields");
+            return;
+        }
+        let result = await loginUser(form.email, form.password);
+        console.log(result);
+        
     }
 
 

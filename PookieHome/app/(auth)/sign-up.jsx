@@ -3,10 +3,26 @@ import {Link, router} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {View, Text, ScrollView, Dimensions, Alert} from "react-native";
 
-
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/Custom Button";
 
+
+const createUser = async (email, password, username) => {
+    console.log(process.env.EXPO_PUBLIC_BACKEND_URL);
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/sign-up`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, password, username}),
+    });
+
+    if (!response.ok) {
+        throw new Error("An error occurred while signing up");
+    }
+``
+    return await response.json();
+}
 
 const SignUp = () => {
     const [isSubmitting, setSubmitting] = useState(false);
@@ -22,10 +38,10 @@ const SignUp = () => {
         setSubmitting(true);
         try {
             const result = await createUser(form.email, form.password, form.username);
-            setUser(result);
-            setIsLogged(true);
-
-            router.replace("/home");
+            //setUser(result);
+            //setIsLogged(true);
+            console.log(result);
+            router.replace("/sign-in");
         } catch (error) {
             Alert.alert("Error", error.message);
         } finally {
