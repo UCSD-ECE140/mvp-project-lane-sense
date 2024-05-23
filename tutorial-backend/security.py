@@ -36,3 +36,23 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def verify_token(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=400, detail="Invalid token")
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT EXISTS(SELECT 1 FROM Users WHERE user_id = %s) AS id_exists;
+        """
+        cursor.execute(query, (user_id,))
+        result = cursor.fetchone()
+        if not result['id_exists']:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user_id
+    except JWTError as e:
+        print(e)
+        raise HTTPException(status_code=401, detail="Invalid token")

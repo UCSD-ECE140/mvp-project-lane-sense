@@ -1,16 +1,16 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 import uvicorn
 
 from utils import get_db_connection
-from security import create_access_token, get_password_hash
+from security import create_access_token, get_password_hash, verify_token
 import mysql.connector as mysql
 
 app = FastAPI()
 
 class UserCreate(BaseModel):
-    name: str
+    username: str
     email: str
     password: str
 
@@ -38,6 +38,10 @@ async def create_user(user: UserCreate):
     finally:
         cursor.close()
         conn.close()
+
+@app.get("/example")
+async def example(user_id: int = Depends(verify_token)):
+    return {"message": "You made an authorized request! Here's your user ID: " + str(user_id)}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=6543)
