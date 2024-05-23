@@ -2,4 +2,4 @@
 
 Tutorial code is in `tutorial-backend` and `tutorial2` directories
 
-[Efrain & Sudhir Tech Assignment 3 Video Link](https://drive.google.com/file/d/1lxmIqDKOYPR4rXLJGfeTNL4d68mG5hr9/view?usp=sharing)
+[Efrain & Sudhir Tech Assignment 3 Video Link](https://www.youtube.com/watch?v=X2aCXifyddg)
