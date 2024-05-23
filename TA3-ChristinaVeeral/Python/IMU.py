@@ -1,8 +1,11 @@
 from CommLib.Communication import Communication
 from CommLib.CircularList import CircularList
+from CommLib.QuaternionFilter import QuaternionFilter
 from matplotlib import pyplot as plt
 from time import time, sleep
 import numpy as np
+
+
 
 if __name__ == "__main__":
     # Configuration
@@ -35,7 +38,8 @@ if __name__ == "__main__":
     # Communication setup
     comms = Communication("/dev/cu.usbserial-0001", 115200)
     sleep(3)
-    
+    quat_filter = QuaternionFilter()
+
     try:
         previous_time = 0
         while(True):
@@ -59,13 +63,14 @@ if __name__ == "__main__":
                         my_value = float(my_value)
                         mz_value = float(mz_value)
                         temperature_value = float(temperature_value)
-                    else:
-                        print("Received message does not contain the expected number of values:", len(parts))
+                        
+                    
                 except ValueError as e:
                     print("Failed to convert to float:", e)
                     print("Received message:", message)
                     continue
-
+                
+                quat_filter.update(ax_value, ay_value, az_value, gx_value, gy_value, gz_value, mx_value, my_value, mz_value)
                 ax.add(ax_value)
                 ay.add(ay_value)
                 az.add(az_value)
@@ -76,10 +81,30 @@ if __name__ == "__main__":
                 my.add(my_value)
                 mz.add(mz_value)
                 temperature.add(temperature_value)
+
+                                
+                 # Harsh event detection
+                if ax_value < -2.0 and ay_value < 0.5 and az_value > 9.0:
+                    comms.send_message("Harsh braking detected!")
+                    
+                if ax_value > 2.0:
+                    comms.send_message("Harsh acceleration detected!")
+                    
+                if abs(gy_value) > 2.0:  
+                    comms.send_message("Harsh turning detected!")
+                    
+                
+                # Check for a flipped car
+                if az_value < -9.0:
+                    print("flipped")
+                    comms.send_message("Car flipped detected")
                 
 
     except(Exception, KeyboardInterrupt) as e:
         print(e)                     # Exiting the program due to exception
     finally:
-        #comms.send_message("sleep")  # stop sending data
+        comms.send_message("sleep")  # stop sending data
         comms.close()
+
+
+
