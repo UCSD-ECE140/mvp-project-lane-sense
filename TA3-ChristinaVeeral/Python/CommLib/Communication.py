@@ -1,5 +1,6 @@
 import serial
 from time import sleep
+import time  # Import the time module for adding delays
 
 """
 A class to handle Serial communication between Python and the MCU
@@ -48,12 +49,12 @@ class Communication:
     At 50Hz sampling and baud rate of 115200, the limit is 288 bytes/sample
     115200 b/s == 14400 B/s == (14400 B/s)/(50 s/sample) = 288 bytes/sample
   '''
-  def receive_message(self,num_bytes=8):
-    #print("I am decoding")
-    if(self.__ser.in_waiting > 0):
-      return self.__ser.readline(num_bytes).decode('utf-8')
+  def receive_message(self, num_bytes=100):
+    if self.__ser.in_waiting > 0:
+        received_message = self.__ser.readline(num_bytes).decode('utf-8', errors='ignore')
+        return received_message
     else:
-      return None
+        return None
 
   '''
   Clear the data buffer in case it is necessary to eliminate junk data

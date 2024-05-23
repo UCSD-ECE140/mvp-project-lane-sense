@@ -29,16 +29,16 @@ void loop() {
 }
 
 void send_sensor_data() {
-    String response = String("Accel X: ") + String(mpu.getAccX(), 2) + ", " +
-                      String("Accel Y: ") + String(mpu.getAccY(), 2) + ", " +
-                      String("Accel Z: ") + String(mpu.getAccZ(), 2) + ", " +
-                      String("Gyro X: ") + String(mpu.getGyroX(), 2) + ", " +
-                      String("Gyro Y: ") + String(mpu.getGyroY(), 2) + ", " +
-                      String("Gyro Z: ") + String(mpu.getGyroZ(), 2) + ", " +
-                      String("Mag X: ") + String(mpu.getMagX(), 2) + ", " +
-                      String("Mag Y: ") + String(mpu.getMagY(), 2) + ", " +
-                      String("Mag Z: ") + String(mpu.getMagZ(), 2) + ", " +
-                      String("Temperature: ") + String(mpu.getTemperature(), 2) + " °C\n";
+    String response = String(mpu.getAccX(), 2) + ", " +
+                      String(mpu.getAccY(), 2) + ", " +
+                      String(mpu.getAccZ(), 2) + ", " +
+                      String(mpu.getGyroX(), 2) + ", " +
+                      String(mpu.getGyroY(), 2) + ", " +
+                      String(mpu.getGyroZ(), 2) + ", " +
+                      String(mpu.getMagX(), 2) + ", " +
+                      String(mpu.getMagY(), 2) + ", " +
+                      String(mpu.getMagZ(), 2) + ", " +
+                      String(mpu.getTemperature(), 2);
     sendMessage(response);
 }
 

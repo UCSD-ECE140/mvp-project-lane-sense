@@ -21,48 +21,51 @@ if __name__ == "__main__":
     my = CircularList([], num_samples)
     mz = CircularList([], num_samples)
     temperature = CircularList([], num_samples)
+    ax_value = 0.0
+    ay_value = 0.0
+    az_value = 0.0
+    gx_value = 0.0
+    gy_value = 0.0
+    gz_value = 0.0
+    mx_value = 0.0
+    my_value = 0.0
+    mz_value = 0.0
+    temperature_value = 0.0
     
-    running_avg_ax = CircularList([], num_samples)
-    running_avg_ay = CircularList([], num_samples)
-    running_avg_az = CircularList([], num_samples)
-    sample_diff = CircularList([], num_samples)
-    l2_norm = CircularList([], num_samples)
-    l1_norm = CircularList([], num_samples)
-    custom_transform = CircularList([], num_samples)
-
     # Communication setup
     comms = Communication("/dev/cu.usbserial-0001", 115200)
     sleep(3)
-    #comms.clear()                   # just in case any junk is in the pipes
     
     try:
         previous_time = 0
         while(True):
             message = comms.receive_message()
-            print(message)
             if message is not None:
                 try:
                     parts = message.split(',')
-                    (timestamp, ax_value, ay_value, az_value,
-                     gx_value, gy_value, gz_value,
-                     mx_value, my_value, mz_value,
-                     temperature_value) = parts
-                    timestamp = float(timestamp)
-                    ax_value = float(ax_value)
-                    ay_value = float(ay_value)
-                    az_value = float(az_value)
-                    gx_value = float(gx_value)
-                    gy_value = float(gy_value)
-                    gz_value = float(gz_value)
-                    mx_value = float(mx_value)
-                    my_value = float(my_value)
-                    mz_value = float(mz_value)
-                    temperature_value = float(temperature_value)
-                except ValueError:        # if corrupted data, skip the sample
+                    if len(parts) == 10:
+                        parts = [part.strip() for part in parts]
+                        (ax_value, ay_value, az_value,
+                        gx_value, gy_value, gz_value,
+                        mx_value, my_value, mz_value,
+                        temperature_value) = parts
+                        ax_value = float(ax_value)
+                        ay_value = float(ay_value)
+                        az_value = float(az_value)
+                        gx_value = float(gx_value)
+                        gy_value = float(gy_value)
+                        gz_value = float(gz_value)
+                        mx_value = float(mx_value)
+                        my_value = float(my_value)
+                        mz_value = float(mz_value)
+                        temperature_value = float(temperature_value)
+                    else:
+                        print("Received message does not contain the expected number of values:", len(parts))
+                except ValueError as e:
+                    print("Failed to convert to float:", e)
+                    print("Received message:", message)
                     continue
 
-                # add the new values to the circular lists
-                times.add(timestamp / 1000)
                 ax.add(ax_value)
                 ay.add(ay_value)
                 az.add(az_value)
@@ -73,33 +76,7 @@ if __name__ == "__main__":
                 my.add(my_value)
                 mz.add(mz_value)
                 temperature.add(temperature_value)
-
-                # if enough time has elapsed, clear the axis, and plot data
-                current_time = time()
-                if (current_time - previous_time > refresh_time):
-                    previous_time = current_time
-                    plt.cla()
-                    plt.clf()
-                    
-                    # Original data plotting (example with az)
-                    plt.plot(times.data, ax.data, label='ax')
-                    plt.plot(times.data, ay.data, label='ay')
-                    plt.plot(times.data, az.data, label='az')
-                    
-                    #Add more plots for other variables if needed
-                    plt.plot(times.data, ax.data, label='ax')
-                    plt.plot(times.data, ay.data, label='ay')
-                    plt.plot(times.data, gx.data, label='gx')
-                    plt.plot(times.data, gy.data, label='gy')
-                    plt.plot(times.data, gz.data, label='gz')
-                    plt.plot(times.data, mx.data, label='mx')
-                    plt.plot(times.data, my.data, label='my')
-                    plt.plot(times.data, mz.data, label='mz')
-                    plt.plot(times.data, temperature.data, label='temperature')
-
-                    plt.legend()
-                    plt.draw()
-                    plt.pause(0.001)
+                
 
     except(Exception, KeyboardInterrupt) as e:
         print(e)                     # Exiting the program due to exception
