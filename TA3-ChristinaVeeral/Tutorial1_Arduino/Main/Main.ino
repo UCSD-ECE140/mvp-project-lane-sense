@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "MPU9250.h"
+#include <MPU9250.h>
+
 #include <SPI.h>
 
 MPU9250 mpu;

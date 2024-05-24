@@ -21,15 +21,15 @@
 #include <Arduino_GFX_Library.h>
 #include "graphics.c"
 
-#define GFX_BL 15 //backlight pin
+#define GFX_BL 15  //backlight pin
 Arduino_DataBus *bus = new Arduino_ESP32SPI(4 /* DC */, 15 /* CS */, 17 /* SCK */, 16 /* MOSI */, 5 /* MISO */);
 Arduino_GFX *gfx = new Arduino_ILI9488_18bit(bus, 2 /* RST /, 1 / rotation */, false /* IPS */);
 
-const int MAX_GRAPHIC_OPTIONS = 3; 
+const int MAX_GRAPHIC_OPTIONS = 3;
 char *graphicOptions[MAX_GRAPHIC_OPTIONS]{
-	"happy",
-	"neutral",
-	"mad"
+  "happy",
+  "neutral",
+  "mad"
 };
 
 bool in_graphics;
@@ -41,8 +41,7 @@ int prev_state = 1, state = 1, num_items = 3;
  * End of Arduino_GFX setting
  ******************************************************************************/
 
-void setup(void)
-{
+void setup(void) {
   Serial.begin(115200);
 
 #ifdef GFX_EXTRA_PRE_INIT
@@ -50,8 +49,7 @@ void setup(void)
 #endif
 
   // Init Display
-  if (!gfx->begin())
-  {
+  if (!gfx->begin()) {
     Serial.println("gfx->begin() failed!");
   }
   gfx->fillScreen(BLACK);
@@ -63,71 +61,68 @@ void setup(void)
 
   gfx->setCursor(10, 10);
   gfx->setTextColor(RED);
-  gfx->println("Setup Done");
+  gfx->println("Set Done");
 
-  delay(5000); // 5 seconds
+  delay(5000);  // 5 seconds
 }
 
-void loop()
-{
-  if(Serial.available() > 0){
+void loop() {
+  if (Serial.available() > 0) {
     String data = Serial.readStringUntil('\n');
-    if (data.charAt(data.length() - 1) <= 'a' && data.charAt(data.length() - 1) >= 'z') {                      // check if data ends with newline character
-        data = data.substring(0, data.length() - 1);  // remove newline character
+    if (data.charAt(data.length() - 1) <= 'a' && data.charAt(data.length() - 1) >= 'z') {  // check if data ends with newline character
+      data = data.substring(0, data.length() - 1);                                         // remove newline character
     }
-    Serial.println(data);
     if (data.length() > 0 && data.charAt(0) >= 'a' && data.charAt(0) <= 'z') {
-    for (int i = 0; i < num_items; i++) { 
-      if (strstr(graphicOptions[i], data.c_str()) != NULL) {
-        in_graphics = true;
-      }
-      if(in_graphics){
-        changeState(data);
+      Serial.println(data);
+      for (int i = 0; i < num_items; i++) {
+        if (strstr(graphicOptions[i], data.c_str()) != NULL) {
+          in_graphics = true;
+          changeState(data);
+          if (state != prev_state) {
+            switch (state) {  // Screen Selection
+              case (0):
+                Serial.println("im happy");
+                happy_screen();
+                break;
+              case (1):
+                Serial.println("im ok");
+                neutral_screen();
+                break;
+              case (2):
+                Serial.println("im mad");
+                mad_screen();
+                break;
+            }
+          }
+        }
       }
     }
   }
-  }
-  
-  if(state != prev_state){
-    switch (state) {  // Screen Selection
-        case (0): 
-          Serial.println("im happy");
-          happy_screen();
-          break;
-        case (1): 
-          Serial.println("im ok");
-          neutral_screen();
-          break;
-        case (2): 
-          Serial.println("im mad");
-          mad_screen();
-          break;
-    }
-  }
 }
 
-void happy_screen(){
-    gfx->fillScreen(gfx->color565(70, 157, 233));                                                      // blue background
-    gfx->drawBitmap(100, 85, happy, 78, 135, gfx->color565(0, 0, 0));
+void happy_screen() {
+  gfx->fillScreen(gfx->color565(70, 157, 233));  // blue background
+  gfx->drawBitmap(0, 0, happy, 320, 240, gfx->color565(0, 200, 0));
 }
 
-void neutral_screen(){
-    gfx->fillScreen(gfx->color565(70, 157, 233));                                                      // blue background
-    gfx->drawBitmap(100, 85, neutral, 78, 135, gfx->color565(0, 0, 0));
+void neutral_screen() {
+  gfx->fillScreen(gfx->color565(70, 157, 233));  // blue background
+  gfx->drawBitmap(0, 0, neutral, 320, 240, gfx->color565(0, 0, 0));
 }
 
-void mad_screen(){
-    gfx->fillScreen(gfx->color565(70, 157, 233));                                                      // blue background
+void mad_screen() {
+  gfx->fillScreen(gfx->color565(70, 157, 233));  // blue background
 
-    gfx->drawBitmap(100, 85, mad, 78, 135, gfx->color565(0, 0, 0));
+  gfx->drawBitmap(0, 0, mad, 320, 240, gfx->color565(255, 255, 255));
 }
 
 void changeState(String data) {
-  char* mydata = new char[strlen(data.c_str())+1];
-  strcpy(mydata,data.c_str());
+  char *mydata = new char[strlen(data.c_str()) + 1];
+  strcpy(mydata, data.c_str());
   prev_state = state;
   if (strstr(mydata, "happy")) { state = 0; }
   if (strstr(mydata, "neutral")) { state = 1; }
   if (strstr(mydata, "mad")) { state = 2; }
   delete[] mydata;
+  data = "";
 }
