@@ -21,10 +21,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    user_id = verify_token(token)
-    return user_id
-
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -57,7 +53,7 @@ def authenticate_user(email: str, password: str):
         return user
     return None
 
-def verify_token(token: str):
+def verify_token(token: str = Depends(oauth2_scheme)):
     # This function should verify the token, by decoding the user_id from it,
     # and checking if the user_id exists in the database
     try:
