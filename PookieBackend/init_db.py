@@ -75,7 +75,7 @@ try:
             trip_id INT NOT NULL,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             location POINT NOT NULL,
-            FOREIGN KEY (trip_id) REFERENCES trips(trip_id),
+            FOREIGN KEY (trip_id) REFERENCES Trips(trip_id),
             SPATIAL INDEX (location)
         );
     """)
