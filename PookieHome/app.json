@@ -24,8 +24,16 @@
         "backgroundColor": "#ffffff"
       },
       "config": {
-        "googleMapsApiKey": "AIzaSyBqErxBAj2SgY8DqzXHLpDPEsAReH8LB64"
-      }
+        "googleMaps": {
+          "apiKey": "AIzaSyBqErxBAj2SgY8DqzXHLpDPEsAReH8LB64"
+        }
+      },
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "package": "com.anonymous.PookieHome"
     },
     "web": {
       "bundler": "metro",
@@ -34,7 +42,18 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": [
+            "peripheral",
+            "central"
+          ],
+          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
