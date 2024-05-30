@@ -37,7 +37,7 @@ const Location = () => {
                     />
                     <Text className={"font-pbold text-3xl"}>Trip info</Text>
                     <View>
-                        <MapView className={"w-full h-full"}/>
+                        <MapView className={"w-full h-full"} provider={PROVIDER_GOOGLE}/>
                     </View>
                     <Text className={"ml-2 font-pbold text-2xl"}>Trip Summary:</Text>
                     <Text className={"ml-2 mt-2 text-xl italic"}>Pookie travelled 20 miles to
