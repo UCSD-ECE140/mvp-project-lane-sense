@@ -2,6 +2,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import {Slot, SplashScreen, Stack} from 'expo-router';
 import {useFonts} from 'expo-font';
 import {useEffect} from "react";
+import { BluetoothProvider } from '../BluetoothContext';
 
 export default function App() {
     const [fontsLoaded, error] = useFonts({
@@ -30,9 +31,12 @@ export default function App() {
 
     return(
         // <Slot/>
+        <BluetoothProvider>
+            {/* ^ This is so that the bluetooth device can be accessed from anywhere in the app */}
         <Stack>
             <Stack.Screen name = "index" options={{headerShown: false}} />
             <Stack.Screen name = "home" options={{headerShown: false}} />
         </Stack>
+        </BluetoothProvider>
     )
 }

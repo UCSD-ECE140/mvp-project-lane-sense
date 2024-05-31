@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
-import useBLE from '../useBLE';
+import { useBluetooth } from '../BluetoothContext';
 import CustomButton from '../components/Custom Button';
 
 const BluetoothConnection = () => {
@@ -11,7 +11,7 @@ const BluetoothConnection = () => {
         connectToDevice,
         connectedDevice,
         disconnectFromDevice,
-    } = useBLE();
+    } = useBluetooth();
 
     useEffect(() => {
         const startScan = async () => {
