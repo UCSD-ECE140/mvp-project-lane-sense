@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
 import useBLE from '../useBLE';
 import CustomButton from '../components/Custom Button';
 
@@ -10,7 +10,7 @@ const BluetoothConnection = () => {
         allDevices,
         connectToDevice,
         connectedDevice,
-        // disconnectFromDevice,
+        disconnectFromDevice,
     } = useBLE();
 
     useEffect(() => {
