@@ -8,12 +8,15 @@ interface BluetoothLowEnergyAPI {
     requestPermissions(): Promise<boolean>;
     scanForPeripherals(): void;
     allDevices: Device[];
+    connectToDevice(device: Device): Promise<void>;
+    connectedDevice: Device | null;
 }
 
 function useBLE(): BluetoothLowEnergyAPI {
     const bleManager = useMemo(() => new BleManager(), []);
     
     const [allDevices, setAllDevices] = useState<Device[]>([]);
+    const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
 
     const requestAndroid31Permissions = async () => {
         const bluetoothScanPermissions = await PermissionsAndroid.request(
@@ -21,7 +24,6 @@ function useBLE(): BluetoothLowEnergyAPI {
             {
                 title: "Bluetooth Scan Permissions",
                 message: "App needs to scan for Bluetooth devices.",
-                buttonNeutral: "Ask Me Later",
                 buttonNegative: "Cancel",
                 buttonPositive: "OK"
             }
@@ -31,7 +33,6 @@ function useBLE(): BluetoothLowEnergyAPI {
             {
                 title: "Bluetooth Connect Permissions",
                 message: "App needs to connect to Bluetooth devices.",
-                buttonNeutral: "Ask Me Later",
                 buttonNegative: "Cancel",
                 buttonPositive: "OK"
             }
@@ -41,7 +42,6 @@ function useBLE(): BluetoothLowEnergyAPI {
             {
                 title: "Bluetooth Fine Location Permissions",
                 message: "App needs to access fine location to connect to Bluetooth devices.",
-                buttonNeutral: "Ask Me Later",
                 buttonNegative: "Cancel",
                 buttonPositive: "OK"
             }
@@ -87,7 +87,7 @@ function useBLE(): BluetoothLowEnergyAPI {
                 console.error(error);
                 return;
             }
-            if (device && device.name?.includes("Pookie")) {
+            if (device /* && device.name?.includes("Pookie") */) {
                 setAllDevices((prevState) => {
                     if (!isDuplicateDevice(prevState, device)) {
                         return [...prevState, device];
@@ -98,11 +98,24 @@ function useBLE(): BluetoothLowEnergyAPI {
         });
     };
 
+    const connectToDevice = async (device: Device) => {
+        try {
+            const deviceConnection = await bleManager.connectToDevice(device.id);
+            setConnectedDevice(deviceConnection);
+            await deviceConnection.discoverAllServicesAndCharacteristics();
+            bleManager.stopDeviceScan();
+        } 
+        catch (error) {
+            console.error("ERROR IN CONNECTION", error);
+        }
+    }
 
     return {
         requestPermissions,
         scanForPeripherals,
         allDevices,
+        connectToDevice,
+        connectedDevice,
     };
 };
 

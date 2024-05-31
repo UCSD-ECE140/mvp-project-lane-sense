@@ -41,7 +41,7 @@ const SignUp = () => {
             //setUser(result);
             //setIsLogged(true);
             console.log(result);
-            router.replace("/sign-in");
+            router.navigate("/sign-in");
         } catch (error) {
             Alert.alert("Error", error.message);
         } finally {

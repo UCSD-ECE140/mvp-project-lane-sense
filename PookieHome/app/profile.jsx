@@ -1,19 +1,14 @@
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import CustomButton from '../components/Custom Button';
-import useBLE from '../useBLE';
 import { router } from 'expo-router';
 
 const Profile = () => {
     const [profileData, setProfileData] = useState(null);
     const [error, setError] = useState(null);
-
-    const {
-        requestPermissions,
-    } = useBLE();
 
     useEffect(() => {
         const fetchProfileData = async () => {
@@ -63,18 +58,8 @@ const Profile = () => {
         );
     }
 
-    const scanForDevices = async () => {
-        const isPermissionsEnabled = await requestPermissions();
-        if (!isPermissionsEnabled) {
-            Alert.alert(
-                'Permissions Required',
-                'Please enable Bluetooth permissions to use this feature',
-                [{text: 'OK'}]
-            );
-            return;
-        }
-        console.log("permissions enabled");
-        router.replace("/connecting");
+    const handleBTButton = async () => {
+        router.navigate('/connecting');
     };
 
     return (
@@ -82,7 +67,7 @@ const Profile = () => {
             <View style={styles.topButtonContainer}>
                 <CustomButton
                     title="Connect to Bluetooth Device"
-                    handlePress={scanForDevices}
+                    handlePress={handleBTButton}
                     containerStyles="bg-black"
                 />
             </View>

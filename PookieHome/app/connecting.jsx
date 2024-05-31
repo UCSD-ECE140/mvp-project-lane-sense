@@ -1,28 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native';
 import useBLE from '../useBLE';
-import CustomButton from '../components/Custom Button'; // Assuming you have this component
+import CustomButton from '../components/Custom Button';
 
 const BluetoothConnection = () => {
     const {
         requestPermissions,
         scanForPeripherals,
         allDevices,
-        // connectToDevice,
-        // connectedDevice,
+        connectToDevice,
+        connectedDevice,
         // disconnectFromDevice,
     } = useBLE();
 
     useEffect(() => {
         const startScan = async () => {
             const isPermissionsEnabled = await requestPermissions();
-            if (isPermissionsEnabled) {
-                console.log("scanning for devices");
-                scanForPeripherals();
+            if (!isPermissionsEnabled) {
+                console.error("permissions not enabled");
+                return;
             }
+            console.log("permissions enabled");
+            console.log("scanning for devices");
+            scanForPeripherals();
         };
         startScan();
     }, []);
+
+    const handleConnect = async (device) => {
+        console.log("Connecting to device:", device.id);
+        await connectToDevice(device);
+        // wait for connection to complete
+        while (!connectedDevice) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        console.log("Connected to device:", connectedDevice.id);
+    }
 
     const renderItem = ({ item }) => (
         <TouchableOpacity style={styles.deviceItem} onPress={() => handleConnect(item)}>
