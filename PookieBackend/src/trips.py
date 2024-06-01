@@ -5,7 +5,7 @@ from utils import get_db_connection
 
 import mysql.connector as mysql
 
-def user_trips(user_id: int):
+def user_completed_trips(user_id: int):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Database connection failed")
@@ -13,7 +13,7 @@ def user_trips(user_id: int):
     query = """
         SELECT trip_id
         FROM Trips
-        WHERE user_id = %s
+        WHERE user_id = %s AND status = 'completed'
         ORDER BY start_time DESC
     """
     try:

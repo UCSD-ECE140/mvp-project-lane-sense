@@ -24,13 +24,20 @@ def create_user(user: UserCreate):
         return {"message": "User already exists"}
     conn = get_db_connection()
     cursor = conn.cursor()
-    query = """
+    user_query = """
         INSERT INTO Users (username, email, password)
         VALUES (%s, %s, %s)
     """
+    pookie_query = """
+        INSERT INTO Pookie (user_id, pookie_name)
+        VALUES (%s, %s)
+    """
     try:
         hashed_password = get_password_hash(user.password)
-        cursor.execute(query, (user.username, user.email, hashed_password))
+        cursor.execute(user_query, (user.username, user.email, hashed_password))
+        conn.commit()
+        new_user_id = cursor.lastrowid
+        cursor.execute(pookie_query, (new_user_id, user.username + "'s Pookie"))
         conn.commit()
         return {"message": "User created"}
     except mysql.Error as e:

@@ -5,10 +5,11 @@ from fastapi.responses import JSONResponse                  # Used for returning
 from fastapi.staticfiles import StaticFiles                 # Used for serving static files
 import uvicorn                                              # Used for running the app                                             
 
-from models import Token, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
+from models import PookieDetails, Token, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
+from pookie import pookie_details, update_pookie_details
 from security import verify_token
 from users import create_user, get_stats, login_user, update_user_stats
-from trips import add_location_update, complete_trip, create_trip, trip_details, trip_route, user_trips, users_latest_trip
+from trips import add_location_update, complete_trip, create_trip, trip_details, trip_route, user_completed_trips, users_latest_trip
 from friends import accept_friend_request, reject_friend_request, send_friend_request
 
 # Configuration
@@ -51,11 +52,11 @@ async def put_user_stats(stats: UserStats, user_id: int = Depends(verify_token))
     message = update_user_stats(user_id, stats)
     return JSONResponse(content={"message": message})
 
-# Get IDs of all trips for a given user, in sorted order
-@app.get("/user/trips", response_model=List[int])
-async def get_user_trips(user_id: int = Depends(verify_token)):
-    trips = user_trips(user_id)
-    return trips
+# Get a list of all a user's completed trips
+@app.get("/user/completed_trips", response_model=List[int])
+async def get_user_completed_trips(user_id: int = Depends(verify_token)):
+    completed_trips = user_completed_trips(user_id)
+    return completed_trips
 
 # Get a user's most recent completed trip
 @app.get("/user/latest_trip", response_model=TripDetails|None)
@@ -74,6 +75,20 @@ async def get_friend_requests(user_id: int = Depends(verify_token)):
 async def get_friends(user_id: int = Depends(verify_token)):
     friend_ids = get_friends(user_id)
     return friend_ids
+
+### Pookie Endpoints ###
+
+# Get a user's pookie details
+@app.get("/pookie/details", response_model=PookieDetails)
+async def get_pookie_details(user_id: int = Depends(verify_token)):
+    details = pookie_details(user_id)
+    return details
+
+# Update a user's pookie details
+@app.put("/pookie/details", response_class=JSONResponse)
+async def put_pookie_details(details: PookieDetails, user_id: int = Depends(verify_token)):
+    message = update_pookie_details(user_id, details)
+    return JSONResponse(content={"message": message})
 
 ### Trip Endpoints ###
 

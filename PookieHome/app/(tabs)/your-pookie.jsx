@@ -1,13 +1,58 @@
 import {View, Text, ScrollView, Image, StyleSheet} from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {SafeAreaView} from "react-native-safe-area-context";
 import LevelBar from "../../components/levelbar";
 import Trip from "../../components/Trip";
 import CustomButton from "../../components/Custom Button";
 import {router} from "expo-router";
+import * as SecureStore from "expo-secure-store";
 
-const YourPookie = (route) => {
-    const { level, pookieName, xp, trips } = route.params;
+const YourPookie = (/* route */) => {
+    // const { level, pookieName, xp, trips } = route.params;
+
+    const [level, setLevel] = useState(0);
+    const [pookieName, setPookieName] = useState("");
+    const [xp, setXp] = useState(0);
+    const [trips, setTrips] = useState([]);
+
+    useEffect(() => {
+        const fetchPookieData = async () => {
+            try {
+                const token = await SecureStore.getItemAsync('token'); // Retrieve token from secure store
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/pookie/details`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                if (error.message?.includes('401')) {
+                    setError('Please log in to view this page');
+                }
+                else {
+                    setError(`Error fetching profile data: ${error.message}`);
+                }
+            }
+        };
+        const setPookieData = async () => {
+            console.log("Fetching pookie data");
+            let pookieData = await fetchPookieData();
+            console.log(pookieData);
+            setLevel(pookieData.level);
+            setPookieName(pookieData.pookie_name);
+            setXp(pookieData.xp);
+            //setTrips(pookieData.trips);
+        }
+        setPookieData();
+    }, []);
 
     return(
             <ScrollView className={"bg-pastel-blue"}>

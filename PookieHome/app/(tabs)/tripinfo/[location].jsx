@@ -17,7 +17,7 @@ const Location = () => {
     const startLong = 2.2069771;
     const endLat = 48.8323785;
     const endLong = 2.3361663;
-    const tripSummary = "Pookie travelled 20 miles to visit Coronado Island. Pookie ABHORRED this bumpy ride and couldn’t enjoy any of the scenery. Drive better, for Pookie’s sake!!!";
+    const tripSummary = "Pookie travelled 20 miles to visit Coronado Island. Pookie ABHORRED this bumpy ride and couldn't enjoy any of the scenery. Drive better, for Pookie's sake!!!";
 
 
     const response = {startLat, startLong, endLat, endLong, tripSummary}

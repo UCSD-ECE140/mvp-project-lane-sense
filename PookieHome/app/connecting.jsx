@@ -13,6 +13,7 @@ const BluetoothConnection = () => {
         disconnectFromDevice,
     } = useBluetooth();
 
+    // scan for devices when this component is mounted
     useEffect(() => {
         const startScan = async () => {
             const isPermissionsEnabled = await requestPermissions();
@@ -27,14 +28,16 @@ const BluetoothConnection = () => {
         startScan();
     }, []);
 
+    // runs when the connected device changes
+    useEffect(() => {
+        if (connectedDevice) {
+            console.log("Connected to device:", connectedDevice.name);
+        }
+    }, [connectedDevice]);
+
     const handleConnect = async (device) => {
         console.log("Connecting to device:", device.id);
         await connectToDevice(device);
-        // wait for connection to complete
-        while (!connectedDevice) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-        console.log("Connected to device:", connectedDevice.id);
     }
 
     const renderItem = ({ item }) => (

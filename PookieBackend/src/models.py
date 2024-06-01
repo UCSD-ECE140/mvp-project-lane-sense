@@ -20,6 +20,12 @@ class UserStats(BaseModel):
     fast_accelerations: int
     driver_rating: int
 
+class PookieDetails(BaseModel):
+    pookie_name: str
+    level: int
+    biscuits: int
+    xp: int
+
 class TripCreate(BaseModel):
     start_location: List[float]
 
