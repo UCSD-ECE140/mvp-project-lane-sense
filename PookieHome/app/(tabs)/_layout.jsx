@@ -12,6 +12,12 @@ const TabsLayout = () => {
                     options = {{
                         headerShown: false,
                     }}
+                    initialParams={{
+                        level: 5,
+                        pookieName: 'Pookie',
+                        xp: 50,
+                        trips: [{location: "Coronado Island", distance: "5 mi", biscuits: "5", stars: "3"}],
+                    }}
                 />
             </Stack>
 

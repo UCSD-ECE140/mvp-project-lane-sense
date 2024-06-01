@@ -33,10 +33,10 @@ export default function App() {
         // <Slot/>
         <BluetoothProvider>
             {/* ^ This is so that the bluetooth device can be accessed from anywhere in the app */}
-        <Stack>
-            <Stack.Screen name = "index" options={{headerShown: false}} />
-            <Stack.Screen name = "home" options={{headerShown: false}} />
-        </Stack>
+            <Stack>
+                <Stack.Screen name = "index" options={{headerShown: false}} />
+                <Stack.Screen name = "home" options={{headerShown: false}} />
+            </Stack>
         </BluetoothProvider>
     )
 }

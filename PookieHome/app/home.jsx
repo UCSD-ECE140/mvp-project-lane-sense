@@ -9,7 +9,7 @@ const image = require("../assets/images/pookieHome.png")
 
 export default function App() {
     return (
-        <View className="flex-1 items-center justify-center bg-primary">
+        <View className="flex-1 items-center justify-center">
             <ImageBackground source={image} className="relative w-screen h-screen">
                 <SafeAreaView className="flex-1 static justify-center">
                     <Text style={styles.text} className="absolute font-pbold text-custom-yellow top-16 left-0 right-0 text-center">Join the PookieVerse</Text>

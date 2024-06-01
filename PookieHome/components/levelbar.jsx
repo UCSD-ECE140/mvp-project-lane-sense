@@ -1,7 +1,7 @@
 import React from 'react'
 import {StyleSheet, Text, View} from "react-native";
 
-const LevelBar = ({progress,height,otherStyles}) => {
+const LevelBar = ({progress,height,otherStyles, childStyles}) => {
     const styles = StyleSheet.create({
         Parentdiv: {
             height: height,
@@ -21,7 +21,7 @@ const LevelBar = ({progress,height,otherStyles}) => {
 
     return (
         <View style={styles.Parentdiv} className = {`bg-pastel-orange ${otherStyles}`}>
-            <View style={styles.Childdiv} className = {`bg-blue-500`}>
+            <View style={styles.Childdiv} className = {`bg-blue-500 ${childStyles}`}>
             </View>
         </View>
     )

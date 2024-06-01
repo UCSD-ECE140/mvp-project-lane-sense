@@ -8,6 +8,9 @@ module.exports = {
         "custom-yellow": '#FFE604',
         "pastel-blue": '#ADD8E6', // Light Blue
         "pastel-orange": '#FFB054',
+        "koala-base": '#8FCCDB',
+        "eph-bg": '#ECCA68',
+        "gf-bg": '#9457BF'
       }
     },
     keyframes: {
