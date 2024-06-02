@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
-import { useBluetooth } from '../BluetoothContext';
-import CustomButton from '../components/Custom Button';
+import { useBluetooth } from '../../BluetoothContext';
+import CustomButton from '../../components/Custom Button';
+import { router } from 'expo-router';
 
 const BluetoothConnection = () => {
     const {
@@ -38,6 +39,7 @@ const BluetoothConnection = () => {
     const handleConnect = async (device) => {
         console.log("Connecting to device:", device.id);
         await connectToDevice(device);
+        router.back();
     }
 
     const renderItem = ({ item }) => (

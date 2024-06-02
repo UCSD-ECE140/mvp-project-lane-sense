@@ -58,16 +58,12 @@ const Profile = () => {
         );
     }
 
-    const handleBTButton = async () => {
-        router.navigate('/connecting');
-    };
-
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.topButtonContainer}>
                 <CustomButton
-                    title="Connect to Bluetooth Device"
-                    handlePress={handleBTButton}
+                    title="Go to Your Pookie!"
+                    handlePress={() => router.push('/(tabs)/your-pookie')}
                     containerStyles="bg-black"
                 />
             </View>
@@ -75,7 +71,7 @@ const Profile = () => {
                 <Text>Pookie Driver Stats:</Text>
                 <Text>Harsh Turns: {profileData.harsh_turns}</Text>
                 <Text>Harsh Brakes: {profileData.harsh_brakes}</Text>
-                <Text>Fast Accelerations: {profileData.fast_accelerations}</Text>
+                <Text>Harsh Accelerations: {profileData.harsh_accelerations}</Text>
                 <Text>Driver Rating: {profileData.driver_rating}</Text>
                 <StatusBar style="auto" />
             </View>

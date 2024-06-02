@@ -1,11 +1,12 @@
-import {View, Text, ScrollView, Image, StyleSheet} from 'react-native';
+import { View, Text, ScrollView, Image, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import {SafeAreaView} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import LevelBar from "../../components/levelbar";
 import Trip from "../../components/Trip";
 import CustomButton from "../../components/Custom Button";
-import {router} from "expo-router";
+import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import fetchGetData from '../../utils';
 
 const YourPookie = (/* route */) => {
     // const { level, pookieName, xp, trips } = route.params;
@@ -19,22 +20,9 @@ const YourPookie = (/* route */) => {
     useEffect(() => {
         const fetchPookieData = async () => {
             try {
-                const token = await SecureStore.getItemAsync('token'); // Retrieve token from secure store
-                if (!token) {
-                    throw new Error('No token found');
-                }
-                const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/pookie/details`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
+                return await fetchGetData('pookie/details');
+            } 
+            catch (error) {
                 if (error.message?.includes('401')) {
                     setError('Please log in to view this page');
                 }
@@ -45,22 +33,9 @@ const YourPookie = (/* route */) => {
         };
         const fetchRecentTrips = async () => {
             try {
-                const token = await SecureStore.getItemAsync('token'); // Retrieve token from secure store
-                if (!token) {
-                    throw new Error('No token found');
-                }
-                const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/user/recent_trips`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
+                return await fetchGetData('user/recent_trips');
+            } 
+            catch (error) {
                 if (error.message?.includes('401')) {
                     setError('Please log in to view this page');
                 }
@@ -82,9 +57,22 @@ const YourPookie = (/* route */) => {
         setPookieData();
     }, []);
 
-    return(
-            <ScrollView className={"bg-pastel-blue"}>
-                <View className = "flex-col">
+    const handleBTButton = async () => {
+        router.navigate('/connecting');
+    };
+
+    return (
+        <ScrollView className={"bg-pastel-blue"}>
+            <SafeAreaView>
+                <View className={"w-full flex-row"}>
+                    <CustomButton
+                        title="Connect to Your Pookie Device!"
+                        handlePress={handleBTButton}
+                        containerStyles="bg-blue-300 rounded-lg"
+                        textStyles={"underline font-pbold text-white text-2xl"}
+                    />
+                </View>
+                <View className="flex-col">
                     <Text className={"font-pblack ml-auto mr-auto mt-10 text-5xl mb-6 text-fuchsia-50"}>{pookieName}</Text>
                     <View className={"flex-row justify-start ml-auto mr-auto"}>
                         <Text className={"italic font-pmedium pr-2 text-fuchsia-50"}>Lvl. {level}</Text>
@@ -104,9 +92,9 @@ const YourPookie = (/* route */) => {
 
                 <View className={"w-full flex-row"}>
                     <CustomButton
-                        title = "Start a new trip!"
-                        handlePress={()=>{router.push("/start-trip")}}
-                        containerStyles= "mt-5 w-full bg-green-400"
+                        title="Start a new trip!"
+                        handlePress={() => { router.push("/start-trip") }}
+                        containerStyles="mt-5 w-full bg-green-400"
                         textStyles={"underline font-pbold text-white text-4xl pb-10 pt-5"}
                     />
                 </View>
@@ -116,10 +104,11 @@ const YourPookie = (/* route */) => {
                     <View>
                         {trips.map(trip => (
                             <Trip
+                                key={trip.id} // Ensure each Trip has a unique key
                                 location={trip.location}
                                 distance={trip.distance}
                                 biscuits={trip.biscuits}
-                                stars ={trip.stars}
+                                stars={trip.stars}
                             />
                         ))}
                     </View>
@@ -127,21 +116,43 @@ const YourPookie = (/* route */) => {
 
                 <View className={"w-full flex-row"}>
                     <CustomButton
-                        title = "Friends"
-                        handlePress={()=>{router.push("/friends")}}
-                        containerStyles= "mt-5 w-full bg-amber-200"
+                        title="Friends"
+                        handlePress={() => { router.push("/friends") }}
+                        containerStyles="mt-5 w-full bg-amber-200"
                         textStyles={"underline font-pbold text-white text-4xl pb-10 pt-5"}
                     />
                 </View>
-            </ScrollView>
+            </SafeAreaView>
+        </ScrollView>
 
     )
 }
 
 const styles = StyleSheet.create({
+    header: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        padding: 16,
+    },
+    connectButtonContainer: {
+        backgroundColor: '#6200ea', // Deep purple
+        borderRadius: 25,
+        padding: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+        elevation: 5,
+    },
+    connectButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     text: {
         textShadowColor: 'black',
-        textShadowOffset: { width: 0, height: 3},
+        textShadowOffset: { width: 0, height: 3 },
         textShadowRadius: 4,
     }
 });
