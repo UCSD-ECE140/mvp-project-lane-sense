@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse                  # Used for returning
 from fastapi.staticfiles import StaticFiles                 # Used for serving static files
 import uvicorn                                              # Used for running the app                                             
 
-from models import PookieDetails, Token, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
+from models import PookieDetails, RecentTripDetails, Token, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
 from pookie import pookie_details, update_pookie_details
 from security import verify_token
 from users import create_user, get_stats, login_user, update_user_stats
@@ -52,8 +52,8 @@ async def put_user_stats(stats: UserStats, user_id: int = Depends(verify_token))
     message = update_user_stats(user_id, stats)
     return JSONResponse(content={"message": message})
 
-# Get a list of all a user's completed trips
-@app.get("/user/completed_trips", response_model=List[int])
+# Get a list of all a user's completed trips with details of each
+@app.get("/user/recent_trips", response_model=List[RecentTripDetails])
 async def get_user_completed_trips(user_id: int = Depends(verify_token)):
     completed_trips = user_completed_trips(user_id)
     return completed_trips

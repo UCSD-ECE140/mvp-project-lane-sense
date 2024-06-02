@@ -64,7 +64,7 @@ def get_stats(user_id: int):
     pass
     cursor = conn.cursor(dictionary=True)
     query = """
-        SELECT harsh_turns, harsh_brakes, fast_accelerations, driver_rating
+        SELECT harsh_turns, harsh_brakes, harsh_accelerations, driver_rating
         FROM Users
         WHERE user_id = %s
     """
@@ -76,7 +76,7 @@ def get_stats(user_id: int):
         return UserStats(
             harsh_turns=stats['harsh_turns'],
             harsh_brakes=stats['harsh_brakes'],
-            fast_accelerations=stats['fast_accelerations'],
+            harsh_accelerations=stats['harsh_accelerations'],
             driver_rating=stats['driver_rating'],
         )
     except mysql.Error as e:
@@ -91,13 +91,13 @@ def update_user_stats(user_id: int, stats: UserStats):
         raise HTTPException(status_code=500, detail="Database connection failed")
     cursor = conn.cursor(dictionary=True)
     fetch_query = """
-        SELECT harsh_turns, harsh_brakes, fast_accelerations, driver_rating
+        SELECT harsh_turns, harsh_brakes, harsh_accelerations, driver_rating
         FROM Users
         WHERE user_id = %s
     """
     update_query = """
         UPDATE Users
-        SET harsh_turns = %s, harsh_brakes = %s, fast_accelerations = %s, driver_rating = %s
+        SET harsh_turns = %s, harsh_brakes = %s, harsh_accelerations = %s, driver_rating = %s
         WHERE user_id = %s
     """
     try:
@@ -108,7 +108,7 @@ def update_user_stats(user_id: int, stats: UserStats):
         new_stats = (
             user_stats['harsh_turns'] + stats.harsh_turns,
             user_stats['harsh_brakes'] + stats.harsh_brakes,
-            user_stats['fast_accelerations'] + stats.fast_accelerations,
+            user_stats['harsh_accelerations'] + stats.harsh_accelerations,
             user_stats['driver_rating'] + stats.driver_rating,
             user_id
         )

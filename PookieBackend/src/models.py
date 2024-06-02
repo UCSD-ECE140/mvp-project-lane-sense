@@ -17,7 +17,7 @@ class Token(BaseModel):
 class UserStats(BaseModel):
     harsh_turns: int
     harsh_brakes: int
-    fast_accelerations: int
+    harsh_accelerations: int
     driver_rating: int
 
 class PookieDetails(BaseModel):
@@ -33,16 +33,28 @@ class LocationUpdate(BaseModel):
     coordinates: List[float]
     timestamp: datetime
 
+class RecentTripDetails(BaseModel):
+    trip_id: int
+    location: str
+    distance: float
+    biscuits: int
+    stars: int
+
 class TripDetails(BaseModel):
     trip_id: int
-    user_id: int
-    start_time: datetime
-    end_time: datetime|None
     start_location: List[float]
-    end_location: List[float]|None
+    end_location: List[float]
     status: str
-    rating: int
-    rewards: int
+    location: str
+    distance: float
+    biscuits: int
+    stars: int
+
+class TripComplete(BaseModel):
+    end_location: List[float]
+    harsh_turns_made: int
+    harsh_brakes_made: int
+    harsh_accelerations_made: int
 
 class FriendRequest(BaseModel):
     user_id: int

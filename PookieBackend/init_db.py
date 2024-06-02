@@ -37,7 +37,7 @@ try:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             harsh_turns INT DEFAULT 0,
             harsh_brakes INT DEFAULT 0,
-            fast_accelerations INT DEFAULT 0,
+            harsh_accelerations INT DEFAULT 0,
             driver_rating INT DEFAULT 0
         );
     """)
@@ -62,8 +62,10 @@ try:
             start_location POINT NOT NULL,
             end_location POINT NOT NULL,
             status ENUM('active', 'completed') DEFAULT 'active',
-            rating INT NULL DEFAULT 0,
-            rewards INT NULL DEFAULT 0,
+            location VARCHAR(100) NULL DEFAULT '',
+            distance FLOAT NULL DEFAULT 0.0,
+            biscuits INT NULL DEFAULT 0,
+            stars INT NULL DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES Users(user_id),
             SPATIAL INDEX (start_location),
             SPATIAL INDEX (end_location)

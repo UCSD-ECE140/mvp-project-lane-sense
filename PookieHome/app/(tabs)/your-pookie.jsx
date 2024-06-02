@@ -14,6 +14,7 @@ const YourPookie = (/* route */) => {
     const [pookieName, setPookieName] = useState("");
     const [xp, setXp] = useState(0);
     const [trips, setTrips] = useState([]);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchPookieData = async () => {
@@ -42,6 +43,32 @@ const YourPookie = (/* route */) => {
                 }
             }
         };
+        const fetchRecentTrips = async () => {
+            try {
+                const token = await SecureStore.getItemAsync('token'); // Retrieve token from secure store
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/user/recent_trips`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                if (error.message?.includes('401')) {
+                    setError('Please log in to view this page');
+                }
+                else {
+                    setError(`Error fetching profile data: ${error.message}`);
+                }
+            }
+        };
         const setPookieData = async () => {
             console.log("Fetching pookie data");
             let pookieData = await fetchPookieData();
@@ -49,7 +76,8 @@ const YourPookie = (/* route */) => {
             setLevel(pookieData.level);
             setPookieName(pookieData.pookie_name);
             setXp(pookieData.xp);
-            //setTrips(pookieData.trips);
+            let recentTripData = await fetchRecentTrips();
+            setTrips(recentTripData);
         }
         setPookieData();
     }, []);
@@ -71,6 +99,15 @@ const YourPookie = (/* route */) => {
                 <View className={"h-50"}>
                     <Image
                         source={require('../../assets/images/pookie.png')}
+                    />
+                </View>
+
+                <View className={"w-full flex-row"}>
+                    <CustomButton
+                        title = "Start a new trip!"
+                        handlePress={()=>{router.push("/start-trip")}}
+                        containerStyles= "mt-5 w-full bg-green-400"
+                        textStyles={"underline font-pbold text-white text-4xl pb-10 pt-5"}
                     />
                 </View>
 
