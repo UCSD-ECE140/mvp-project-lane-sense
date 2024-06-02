@@ -9,14 +9,12 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 
-#define bleServerName "MPU9250_ESP32"
+#define bleServerName "Pookie"
 bool deviceConnected = false;
 #define SERVICE_UUID "91bad492-b950-4226-aa2b-4ede9fa42f59"
 
 // UUIDs for the characteristics
-#define HARSH_BRAKING_CHAR_UUID "cba1d466-344c-4be3-ab3f-189f80dd7518"
-#define HARSH_TURNING_CHAR_UUID "f78ebbff-c8b7-4107-93de-889a6a06d408"
-#define HARSH_ACCELERATION_CHAR_UUID "ca73b3ba-39f6-4ab3-91ae-186dc9577d99"
+#define HARSH_EVENTS_CHAR_UUID "ca73b3ba-39f6-4ab3-91ae-186dc9577d99"
 
 const float accelerationThreshold = 3.0;
 const float brakingThreshold = -3.0;
@@ -25,18 +23,17 @@ const unsigned long durationThreshold = 500;
 unsigned long accelerationStartTime = 0;
 unsigned long brakingStartTime = 0;
 unsigned long turningStartTime = 0;
+
 const int redPin = 25;
 const int greenPin = 26;
 
-// BLE Characteristics and Descriptors
-BLECharacteristic harshBrakingCharacteristics(HARSH_BRAKING_CHAR_UUID, BLECharacteristic::PROPERTY_NOTIFY);
-BLEDescriptor harshBrakingDescriptor(BLEUUID((uint16_t)0x2902));
+unsigned int harshAccelerationCount = 0;
+unsigned int harshBrakingCount = 0;
+unsigned int harshTurningCount = 0;
 
-BLECharacteristic harshTurningCharacteristics(HARSH_TURNING_CHAR_UUID, BLECharacteristic::PROPERTY_NOTIFY);
-BLEDescriptor harshTurningDescriptor(BLEUUID((uint16_t)0x2903));
-
-BLECharacteristic harshAccelerationCharacteristics(HARSH_ACCELERATION_CHAR_UUID, BLECharacteristic::PROPERTY_NOTIFY);
-BLEDescriptor harshAccelerationDescriptor(BLEUUID((uint16_t)0x2904));
+// BLE Characteristic and Descriptor
+BLECharacteristic harshEventsCharacteristic(HARSH_EVENTS_CHAR_UUID, BLECharacteristic::PROPERTY_NOTIFY);
+BLEDescriptor harshEventsDescriptor(BLEUUID((uint16_t)0x2902));
 
 MPU9250 mpu;
 
@@ -68,21 +65,10 @@ void setup() {
    // Create the BLE Service
    BLEService *mpuService = pServer->createService(SERVICE_UUID);
 
-   // Create BLE Characteristics and add Descriptors
-   // Harsh Braking
-   mpuService->addCharacteristic(&harshBrakingCharacteristics);
-   harshBrakingDescriptor.setValue("MPU9250 harsh braking");
-   harshBrakingCharacteristics.addDescriptor(&harshBrakingDescriptor);
-
-   // Harsh Turning
-   mpuService->addCharacteristic(&harshTurningCharacteristics);
-   harshTurningDescriptor.setValue("MPU9250 harsh turning");
-   harshTurningCharacteristics.addDescriptor(&harshTurningDescriptor);
-
-   // Harsh Acceleration
-   mpuService->addCharacteristic(&harshAccelerationCharacteristics);
-   harshAccelerationDescriptor.setValue("MPU9250 harsh acceleration");
-   harshAccelerationCharacteristics.addDescriptor(&harshAccelerationDescriptor);
+   // Create BLE Characteristic and add Descriptor
+   mpuService->addCharacteristic(&harshEventsCharacteristic);
+   harshEventsDescriptor.setValue("MPU9250 Harsh Events");
+   harshEventsCharacteristic.addDescriptor(&harshEventsDescriptor);
 
    // Start the service
    mpuService->start();
@@ -141,11 +127,8 @@ void loop() {
         if (accelerationStartTime == 0) {
           accelerationStartTime = currentTime;
         } else if ((currentTime - accelerationStartTime) >= durationThreshold) {
-          static char accelerationValue[8];
-          dtostrf(linearAccX, 6, 2, accelerationValue);
-          harshAccelerationCharacteristics.setValue(accelerationValue);
-          harshAccelerationCharacteristics.notify();
-          delay(1000);
+          harshAccelerationCount++;
+          sendHarshEventCounts();
           accelerationStartTime = 0;
         }
       } else {
@@ -157,28 +140,23 @@ void loop() {
         if (brakingStartTime == 0) {
           brakingStartTime = currentTime;
         } else if ((currentTime - brakingStartTime) >= durationThreshold) {
-          static char brakingValue[8];
-          dtostrf(linearAccX, 6, 2, brakingValue);
-          harshBrakingCharacteristics.setValue(brakingValue);
-          harshBrakingCharacteristics.notify();
-          delay(1000); // Wait for 1 second before sending the next message
-          brakingStartTime = 0; // Reset the timer
+          harshBrakingCount++;
+          sendHarshEventCounts();
+          brakingStartTime = 0;
         }
       } else {
         brakingStartTime = 0;
       }
+
 
       // Check for harsh turning
       if (abs(gyroZ) > turningThreshold) {
         if (turningStartTime == 0) {
           turningStartTime = currentTime;
         } else if ((currentTime - turningStartTime) >= durationThreshold) {
-          static char turningValue[8];
-          dtostrf(gyroZ - turningThreshold, 6, 2, turningValue);
-          harshTurningCharacteristics.setValue(turningValue);
-          harshTurningCharacteristics.notify();
-          delay(1000);
-          turningStartTime = 0; // Reset the timer
+          harshTurningCount++;
+          sendHarshEventCounts();
+          turningStartTime = 0;
         }
       } else {
         turningStartTime = 0;
@@ -188,4 +166,11 @@ void loop() {
     Serial.println("No device connected");
     delay(1000); // Avoid spamming the log
   }
+}
+
+void sendHarshEventCounts() {
+  char harshEventCounts[50];
+  snprintf(harshEventCounts, sizeof(harshEventCounts), "{\"harsh_turns\": %d, \"harsh_brakes\": %d, \"harsh_accelerations\": %d}", harshTurningCount, harshBrakingCount, harshAccelerationCount);
+  harshEventsCharacteristic.setValue(harshEventCounts);
+  harshEventsCharacteristic.notify();
 }

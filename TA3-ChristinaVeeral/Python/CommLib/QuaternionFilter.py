@@ -109,19 +109,7 @@ class QuaternionFilter:
 
         return self.q
 
-    def calculate_roll_pitch_yaw(quat_filter):
-        q = quat_filter.get_quaternion()  # Assuming this method exists to get the current quaternion
-        q0, q1, q2, q3 = q[0], q[1], q[2], q[3]
 
-        roll = np.arctan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
-        pitch = np.arcsin(2 * (q0 * q2 - q3 * q1))
-        yaw = np.arctan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
-
-        roll = np.degrees(roll)
-        pitch = np.degrees(pitch)
-        yaw = np.degrees(yaw)
-
-        return roll, pitch, yaw
 
     def mahony(self, ax, ay, az, gx, gy, gz, mx, my, mz):
         q0, q1, q2, q3 = self.q
