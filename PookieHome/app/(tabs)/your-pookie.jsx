@@ -1,21 +1,26 @@
-import { View, Text, ScrollView, Image, StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, Image, StyleSheet, Alert } from 'react-native';
+import { useEffect, useState } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
 import LevelBar from "../../components/levelbar";
 import Trip from "../../components/Trip";
 import CustomButton from "../../components/Custom Button";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import fetchGetData from '../../utils';
+import { fetchGetData } from '../../utils';
+import { useBluetooth } from '../../BluetoothContext';
 
 const YourPookie = (/* route */) => {
     // const { level, pookieName, xp, trips } = route.params;
+    const {
+        connectedDevice,
+    } = useBluetooth();
 
     const [level, setLevel] = useState(0);
     const [pookieName, setPookieName] = useState("");
     const [xp, setXp] = useState(0);
     const [trips, setTrips] = useState([]);
     const [error, setError] = useState(null);
+    const [connectButtonText, setConnectButtonText] = useState("Connect to Your Pookie Device!");
 
     useEffect(() => {
         const fetchPookieData = async () => {
@@ -57,7 +62,7 @@ const YourPookie = (/* route */) => {
         setPookieData();
     }, []);
 
-    const handleBTButton = async () => {
+    const handleBTButton = () => {
         router.navigate('/connecting');
     };
 
@@ -66,10 +71,11 @@ const YourPookie = (/* route */) => {
             <SafeAreaView>
                 <View className={"w-full flex-row"}>
                     <CustomButton
-                        title="Connect to Your Pookie Device!"
+                        title={connectButtonText}
                         handlePress={handleBTButton}
                         containerStyles="bg-blue-300 rounded-lg"
                         textStyles={"underline font-pbold text-white text-2xl"}
+                        isLoading={connectedDevice !== null}
                     />
                 </View>
                 <View className="flex-col">
@@ -104,7 +110,8 @@ const YourPookie = (/* route */) => {
                     <View>
                         {trips.map(trip => (
                             <Trip
-                                key={trip.id} // Ensure each Trip has a unique key
+                                key={trip.trip_id}
+                                trip_id={trip.trip_id}
                                 location={trip.location}
                                 distance={trip.distance}
                                 biscuits={trip.biscuits}

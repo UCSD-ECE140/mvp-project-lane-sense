@@ -31,7 +31,6 @@ class TripCreate(BaseModel):
 
 class LocationUpdate(BaseModel):
     coordinates: List[float]
-    timestamp: datetime
 
 class RecentTripDetails(BaseModel):
     trip_id: int

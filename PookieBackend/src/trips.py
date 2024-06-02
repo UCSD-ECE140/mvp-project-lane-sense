@@ -152,13 +152,12 @@ def add_location_update(trip_id: int, location: LocationUpdate):
         raise HTTPException(status_code=500, detail="Database connection failed")
     cursor = conn.cursor()
     query = """
-        INSERT INTO location_updates (trip_id, timestamp, location)
-        VALUES (%s, %s, POINT(%s, %s))
+        INSERT INTO location_updates (trip_id, location)
+        VALUES (%s, POINT(%s, %s))
     """
     try:
         cursor.execute(query, (
             trip_id,
-            location.timestamp,
             location.coordinates[0], location.coordinates[1]
         ))
         conn.commit()

@@ -5,6 +5,7 @@ import StarRating from "./starRating";
 import {Link} from 'expo-router';
 
 const Trip = ({
+    trip_id,
     location, distance,
     biscuits,
     stars})=>{

@@ -111,7 +111,7 @@ async def get_trip_route(trip_id: int, user_id: int = Depends(verify_token)):
     return route
 
 # Add a new location update point to a trip
-@app.post("/trip/{trip_id}/route", response_class=JSONResponse)
+@app.post("/trip/{trip_id}/location_update", response_class=JSONResponse)
 async def post_location_update(trip_id: int, location: LocationUpdate, user_id: int = Depends(verify_token)):
     message = add_location_update(trip_id, location)
     return JSONResponse(content={"message": message})

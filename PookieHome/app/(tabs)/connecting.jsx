@@ -38,7 +38,12 @@ const BluetoothConnection = () => {
 
     const handleConnect = async (device) => {
         console.log("Connecting to device:", device.id);
-        await connectToDevice(device);
+        try {
+            await connectToDevice(device);
+        } 
+        catch (error) {
+            disconnectFromDevice();
+        }
         router.back();
     }
 
