@@ -20,7 +20,6 @@ const YourPookie = (/* route */) => {
     const [xp, setXp] = useState(0);
     const [trips, setTrips] = useState([]);
     const [error, setError] = useState(null);
-    const [connectButtonText, setConnectButtonText] = useState("Connect to Your Pookie Device!");
 
     useEffect(() => {
         const fetchPookieData = async () => {
@@ -62,22 +61,10 @@ const YourPookie = (/* route */) => {
         setPookieData();
     }, []);
 
-    const handleBTButton = () => {
-        router.navigate('/connecting');
-    };
-
     return (
         <ScrollView className={"bg-pastel-blue"}>
             <SafeAreaView>
-                <View className={"w-full flex-row"}>
-                    <CustomButton
-                        title={connectButtonText}
-                        handlePress={handleBTButton}
-                        containerStyles="bg-blue-300 rounded-lg"
-                        textStyles={"underline font-pbold text-white text-2xl"}
-                        isLoading={connectedDevice !== null}
-                    />
-                </View>
+                
                 <View className="flex-col">
                     <Text className={"font-pblack ml-auto mr-auto mt-10 text-5xl mb-6 text-fuchsia-50"}>{pookieName}</Text>
                     <View className={"flex-row justify-start ml-auto mr-auto"}>
