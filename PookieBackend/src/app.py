@@ -2,7 +2,6 @@
 from typing import List
 from fastapi import Depends, FastAPI                        # The main FastAPI import
 from fastapi.responses import JSONResponse                  # Used for returning HTML responses
-from fastapi.staticfiles import StaticFiles                 # Used for serving static files
 import uvicorn                                              # Used for running the app                                             
 
 from models import PookieDetails, RecentTripDetails, Token, TripComplete, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
@@ -14,7 +13,6 @@ from friends import accept_friend_request, reject_friend_request, send_friend_re
 
 # Configuration
 app = FastAPI()
-#app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Test endpoint
 @app.get("/test", response_class=JSONResponse)

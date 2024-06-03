@@ -1,9 +1,7 @@
 # This file contains the functions to interact with the database for user related operations
 from fastapi import HTTPException
 from models import PookieDetails, PookieStats
-from security import authenticate_user, create_access_token, get_password_hash
 from utils import get_db_connection
-from fastapi import HTTPException, status
 
 import mysql.connector as mysql
 
