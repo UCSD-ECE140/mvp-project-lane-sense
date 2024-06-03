@@ -61,7 +61,7 @@ const YourPookie = (/* route */) => {
     if (error) {
         return (
             <View className={"w-full h-full bg-pastel-blue"}>
-                <Text>{error}</Text>
+                <Text className={"font-pblack ml-auto mr-auto mt-auto mb-auto text-5xl text-fuchsia-50"}>{error}</Text>
             </View>
         );
     }
@@ -69,7 +69,7 @@ const YourPookie = (/* route */) => {
     if (!level || !pookieName || !xp || !trips) {
         return (
             <View className={"w-full h-full bg-pastel-blue"}>
-                <Text className={"font-pblack ml-auto mr-auto text-5xl mb-6 text-fuchsia-50"}>Loading...</Text>
+                <Text className={"font-pblack ml-auto mr-auto mt-auto mb-auto text-5xl text-fuchsia-50"}>Loading...</Text>
             </View>
         );
     }
