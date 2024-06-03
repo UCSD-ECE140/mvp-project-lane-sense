@@ -8,7 +8,11 @@ import { fetchPostData, fetchPutData } from '../../utils';
 import CustomButton from '../../components/Custom Button';
 
 const StartTrip = () => {
-    const { connectedDevice, data, disconnectFromDevice } = useBluetooth();
+    const { 
+        connectedDevice,
+        //data, 
+        disconnectFromDevice 
+    } = useBluetooth();
     
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
@@ -21,19 +25,14 @@ const StartTrip = () => {
     const [harshBrakes, setHarshBrakes] = useState(0); // [3]
     
     const intervalId = useRef(null); // useRef to store the interval ID
-    const isComponentMounted = useRef(true);
 
-    // Cleanup on component unmount
-    /* useEffect(() => {
-        return () => {
-            isComponentMounted.current = false;
-            // Clear interval when the component unmounts
-            if (intervalId.current) {
-                clearInterval(intervalId.current);
-            }
-            
-        };
-    }, []); */
+    // testing updating harsh turns, accelerations, and brakes
+    const testIntervalId = useRef(null); // useRef to store the test interval ID
+    const [data, setData] = useState({
+        harsh_turns: 0,
+        harsh_accelerations: 0,
+        harsh_brakes: 0,
+    }); // Data from Pookie
 
     useEffect(() => {
         const getLocationAndUpdate = async () => {
@@ -53,9 +52,7 @@ const StartTrip = () => {
                 };
                 await fetchPostData(locationUpdateURL, body);
             } catch (error) {
-                if (isComponentMounted.current) {
-                    setErrorMsg(`Error updating trip location: ${error.message}`);
-                }
+                setErrorMsg(`Error updating trip location: ${error.message}`);
             }
         };
 
@@ -85,6 +82,16 @@ const StartTrip = () => {
             }
             // Set interval to periodically fetch and update location
             intervalId.current = setInterval(getLocationAndUpdate, 10 * 1000); // Update every 10 seconds
+            // testing updating harsh turns, accelerations, and brakes
+            testIntervalId.current = setInterval(() => {
+                console.log("Updating harsh turns, accelerations, and brakes");
+                setData(prevData => ({
+                    ...prevData, // Spread the previous state
+                    harsh_turns: prevData.harsh_turns + 1,
+                    harsh_accelerations: prevData.harsh_accelerations + 1,
+                    harsh_brakes: prevData.harsh_brakes + 1,
+                }));
+            }, 20 * 1000);
         };
 
         if (connectedDevice) {
@@ -103,6 +110,7 @@ const StartTrip = () => {
 
     useEffect(() => {
         if (data) {
+            console.log("Received data from Pookie:", data);
             setHarshTurns(data.harsh_turns);
             setHarshAccelerations(data.harsh_accelerations);
             setHarshBrakes(data.harsh_brakes);
@@ -164,6 +172,7 @@ const StartTrip = () => {
             <View style={styles.buttonContainer}>
                 <Button title="Stop Trip" onPress={() => {
                     clearInterval(intervalId.current);
+                    clearInterval(testIntervalId.current);
                     // Disconnect from Bluetooth device
                     disconnectFromDevice();
                     // Make a post request to the server to end the trip
