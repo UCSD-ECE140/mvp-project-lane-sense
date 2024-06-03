@@ -265,7 +265,6 @@ def calculate_trip_result(distance: float, harsh_turns: int, harsh_brakes: int, 
 
 # Accumulate the distance of a trip by summing the distances between each pair of consecutive location updates
 def get_trip_distance(trip_id: int):
-    print("Calculating distance for trip", trip_id)
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Database connection failed")
