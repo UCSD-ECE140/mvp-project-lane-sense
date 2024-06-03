@@ -1,12 +1,20 @@
 {
-    "build": {
-      "development": {
-        "developmentClient": true,
-        "distribution": "internal"
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "android": {
+        "buildType": "apk"
       },
-      "preview": {
-        "distribution": "internal"
-      },
-      "production": {}
+      "env": {
+        "EXPO_PUBLIC_GMAP_API_KEY": "AIzaSyBqErxBAj2SgY8DqzXHLpDPEsAReH8LB64",
+        "EXPO_PUBLIC_BACKEND_URL": "http://64.23.236.49:6543"
+      }
     }
   }
+}
