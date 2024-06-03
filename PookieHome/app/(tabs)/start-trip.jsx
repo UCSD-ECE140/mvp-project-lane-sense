@@ -10,7 +10,7 @@ import CustomButton from '../../components/Custom Button';
 const StartTrip = () => {
     const { 
         connectedDevice,
-        //data, 
+        data, 
         disconnectFromDevice 
     } = useBluetooth();
     
@@ -20,19 +20,19 @@ const StartTrip = () => {
     const [connectButtonText, setConnectButtonText] = useState("Connect to Pookie to Start Your Trip!");
     const [routeCoordinates, setRouteCoordinates] = useState([]); // Array to store the route coordinates
     // Data from Pookie
-    const [harshTurns, setHarshTurns] = useState(0); // [1]
-    const [harshAccelerations, setHarshAccelerations] = useState(0); // [2]
-    const [harshBrakes, setHarshBrakes] = useState(0); // [3]
+    const [harshTurns, setHarshTurns] = useState(0);
+    const [harshAccelerations, setHarshAccelerations] = useState(0);
+    const [harshBrakes, setHarshBrakes] = useState(0);
     
     const intervalId = useRef(null); // useRef to store the interval ID
 
-    // testing updating harsh turns, accelerations, and brakes
+    /* // testing updating harsh turns, accelerations, and brakes
     const testIntervalId = useRef(null); // useRef to store the test interval ID
     const [data, setData] = useState({
         harsh_turns: 0,
         harsh_accelerations: 0,
         harsh_brakes: 0,
-    }); // Data from Pookie
+    }); // Data from Pookie */
 
     useEffect(() => {
         const getLocationAndUpdate = async () => {
@@ -83,7 +83,7 @@ const StartTrip = () => {
             // Set interval to periodically fetch and update location
             intervalId.current = setInterval(getLocationAndUpdate, 10 * 1000); // Update every 10 seconds
             // testing updating harsh turns, accelerations, and brakes
-            testIntervalId.current = setInterval(() => {
+            /* testIntervalId.current = setInterval(() => {
                 console.log("Updating harsh turns, accelerations, and brakes");
                 setData(prevData => ({
                     ...prevData, // Spread the previous state
@@ -91,7 +91,7 @@ const StartTrip = () => {
                     harsh_accelerations: prevData.harsh_accelerations + 1,
                     harsh_brakes: prevData.harsh_brakes + 1,
                 }));
-            }, 20 * 1000);
+            }, 20 * 1000); */
         };
 
         if (connectedDevice) {
@@ -172,7 +172,7 @@ const StartTrip = () => {
             <View style={styles.buttonContainer}>
                 <Button title="Stop Trip" onPress={() => {
                     clearInterval(intervalId.current);
-                    clearInterval(testIntervalId.current);
+                    /* clearInterval(testIntervalId.current); */
                     // Disconnect from Bluetooth device
                     disconnectFromDevice();
                     // Make a post request to the server to end the trip
