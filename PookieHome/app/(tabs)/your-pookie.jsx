@@ -99,6 +99,15 @@ const YourPookie = (/* route */) => {
                     />
                 </View>
 
+                <View className={"w-full flex-row"}>
+                    <CustomButton
+                        title="Friends"
+                        handlePress={() => { router.push("/friends") }}
+                        containerStyles="mt-5 w-full bg-amber-200"
+                        textStyles={"underline font-pbold text-white text-4xl pb-10 pt-5"}
+                    />
+                </View>
+
                 <View>
                     <Text style={styles.text} className={"ml-2 mt-4 mb-4 text-3xl font-pbold text-white"}>Recent Trips:</Text>
                     <View>
@@ -113,15 +122,6 @@ const YourPookie = (/* route */) => {
                             />
                         ))}
                     </View>
-                </View>
-
-                <View className={"w-full flex-row"}>
-                    <CustomButton
-                        title="Friends"
-                        handlePress={() => { router.push("/friends") }}
-                        containerStyles="mt-5 w-full bg-amber-200"
-                        textStyles={"underline font-pbold text-white text-4xl pb-10 pt-5"}
-                    />
                 </View>
             </SafeAreaView>
         </ScrollView>
