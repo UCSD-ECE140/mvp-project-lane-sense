@@ -109,6 +109,7 @@ export const BluetoothProvider: FC<{ children: ReactNode }> = ({ children }) => 
       await deviceConnection.discoverAllServicesAndCharacteristics();
       bleManager.stopDeviceScan();
       startStreamingData(deviceConnection);
+      console.log("Connected to device: ", deviceConnection.id);
     } catch (error) {
       console.error("ERROR IN CONNECTION", error);
     }
@@ -146,6 +147,7 @@ export const BluetoothProvider: FC<{ children: ReactNode }> = ({ children }) => 
       bleManager.cancelDeviceConnection(connectedDevice.id);
       setConnectedDevice(null);
       setData("");
+      console.log("Disconnected from device");
     }
   };
 
