@@ -91,7 +91,7 @@ def update_user_stats(user_id: int, stats: UserStats):
         raise HTTPException(status_code=500, detail="Database connection failed")
     cursor = conn.cursor(dictionary=True)
     fetch_query = """
-        SELECT harsh_turns, harsh_brakes, harsh_accelerations, driver_rating
+        SELECT harsh_turns, harsh_brakes, harsh_accelerations
         FROM Users
         WHERE user_id = %s
     """
@@ -109,12 +109,36 @@ def update_user_stats(user_id: int, stats: UserStats):
             user_stats['harsh_turns'] + stats.harsh_turns,
             user_stats['harsh_brakes'] + stats.harsh_brakes,
             user_stats['harsh_accelerations'] + stats.harsh_accelerations,
-            user_stats['driver_rating'] + stats.driver_rating,
+            calculate_driver_rating(),
             user_id
         )
         cursor.execute(update_query, new_stats)
         conn.commit()
         return "User stats updated"
+    except mysql.Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+    finally:
+        cursor.close()
+        conn.close()
+
+def calculate_driver_rating():
+    # return the average rating of all trips
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Database connection failed")
+    cursor = conn.cursor(dictionary=True)
+    query = """
+        SELECT AVG(stars) as avg_rating
+        FROM Trips
+        WHERE status = 'completed'
+        GROUP BY user_id
+    """
+    try:
+        cursor.execute(query)
+        avg_rating = cursor.fetchone()
+        if avg_rating is None:
+            return 0
+        return avg_rating['avg_rating']
     except mysql.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
     finally:

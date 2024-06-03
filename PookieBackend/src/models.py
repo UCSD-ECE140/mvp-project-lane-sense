@@ -26,6 +26,10 @@ class PookieDetails(BaseModel):
     biscuits: int
     xp: int
 
+class PookieStats(BaseModel):
+    biscuits: int
+    xp: int
+
 class TripCreate(BaseModel):
     start_location: List[float]
 

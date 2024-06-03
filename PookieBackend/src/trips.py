@@ -1,7 +1,9 @@
 # This file contains the functions that interact with the database to get information about trips
 from typing import List
 from fastapi import HTTPException
-from models import LocationUpdate, TripComplete, TripCreate, TripDetails, UserStats
+from models import LocationUpdate, PookieStats, TripComplete, TripCreate, TripDetails, UserStats
+from pookie import update_pookie_stats
+from users import update_user_stats
 from utils import get_db_connection
 from geopy import Nominatim
 from geopy.distance import geodesic
@@ -197,7 +199,7 @@ def last_location_update(trip_id: int):
         cursor.close()
         conn.close()
 
-def complete_trip(trip_id: int, tripComplete: TripComplete):
+def complete_trip(trip_id: int, tripComplete: TripComplete, user_id: int):
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Database connection failed")
@@ -217,9 +219,7 @@ def complete_trip(trip_id: int, tripComplete: TripComplete):
         # calculate distance, biscuits, and stars
         # just giving one for now, will calculate properly later
         distance = get_trip_distance(trip_id)
-        biscuits = 1
-        stars = 1 
-        print("Distance:", distance, "Biscuits:", biscuits, "Stars:", stars, "Location:", location)
+        biscuits, stars = calculate_trip_result(distance, tripComplete.harsh_turns_made, tripComplete.harsh_brakes_made, tripComplete.harsh_accelerations_made)
         cursor.execute(query, (
             lat, lon,
             location, distance, biscuits, stars, 
@@ -227,12 +227,18 @@ def complete_trip(trip_id: int, tripComplete: TripComplete):
         ))
         conn.commit()
         # update the user's stats
-        """ userStats = UserStats(
+        userStats = UserStats(
             harsh_turns=tripComplete.harsh_turns_made,
             harsh_brakes=tripComplete.harsh_brakes_made,
             harsh_accelerations=tripComplete.harsh_accelerations_made,
+            driver_rating=0
         )
-        update_user_stats(trip_id, tripComplete) """
+        pookieStats = PookieStats(
+            biscuits=biscuits,
+            xp=biscuits,
+        )
+        update_user_stats(user_id, userStats)
+        update_pookie_stats(user_id, pookieStats)
         return "Trip completed successfully"
     except mysql.Error as e:
         print(e)
@@ -241,6 +247,27 @@ def complete_trip(trip_id: int, tripComplete: TripComplete):
         cursor.close()
         conn.close()
 
+# Calculate the biscuits and stars for a trip based on the distance and faults
+def calculate_trip_result(distance: float, harsh_turns: int, harsh_brakes: int, harsh_accelerations: int):
+    x = 10
+    harsh_actions_per_x_miles = harsh_turns + harsh_brakes + harsh_accelerations / (distance / x)
+    if harsh_actions_per_x_miles <= 3:
+        base_biscuits = 10
+        stars = 5
+    elif harsh_actions_per_x_miles <= 6:
+        base_biscuits = 5
+        stars = 4
+    elif harsh_actions_per_x_miles <= 9:
+        base_biscuits = 2
+        stars = 3
+    elif harsh_actions_per_x_miles <= 12:
+        base_biscuits = 1
+        stars = 2
+    else:
+        base_biscuits = 0
+        stars = 1
+    biscuits = max(1, int(base_biscuits * distance / 10))
+    return biscuits, stars
 
 # Accumulate the distance of a trip by summing the distances between each pair of consecutive location updates
 def get_trip_distance(trip_id: int):
@@ -258,7 +285,6 @@ def get_trip_distance(trip_id: int):
     try:
         cursor.execute(query, (trip_id,))
         locations = cursor.fetchall()
-        print("Locations:", locations)
         if len(locations) < 2:
             return 0
         distance = 0
@@ -267,7 +293,6 @@ def get_trip_distance(trip_id: int):
             end = (locations[i]['lat'], locations[i]['lon'])
             distance += geodesic(start, end).meters
         distance_in_miles = distance * 0.000621371;
-        print("Distance in miles:", distance_in_miles)
         return distance_in_miles
     except mysql.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")

@@ -6,7 +6,7 @@ from fastapi.staticfiles import StaticFiles                 # Used for serving s
 import uvicorn                                              # Used for running the app                                             
 
 from models import PookieDetails, RecentTripDetails, Token, TripComplete, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
-from pookie import pookie_details, update_pookie_details
+from pookie import pookie_details
 from security import verify_token
 from users import create_user, get_stats, login_user, update_user_stats
 from trips import add_location_update, complete_trip, create_trip, trip_details, trip_route, user_completed_trips, users_latest_trip
@@ -84,12 +84,6 @@ async def get_pookie_details(user_id: int = Depends(verify_token)):
     details = pookie_details(user_id)
     return details
 
-# Update a user's pookie details
-@app.put("/pookie/details", response_class=JSONResponse)
-async def put_pookie_details(details: PookieDetails, user_id: int = Depends(verify_token)):
-    message = update_pookie_details(user_id, details)
-    return JSONResponse(content={"message": message})
-
 ### Trip Endpoints ###
 
 # Create a new trip under a user
@@ -119,7 +113,7 @@ async def post_location_update(trip_id: int, location: LocationUpdate, user_id: 
 # Complete a trip
 @app.put("/trip/{trip_id}/complete", response_class=JSONResponse)
 async def put_trip_complete(trip_id: int, tripComplete: TripComplete, user_id: int = Depends(verify_token)):
-    message = complete_trip(trip_id, tripComplete)
+    message = complete_trip(trip_id, tripComplete, user_id)
     return JSONResponse(content={"message": message})
 
 ### Friend Endpoints ###
