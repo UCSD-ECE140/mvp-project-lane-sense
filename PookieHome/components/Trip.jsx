@@ -10,7 +10,7 @@ const Trip = ({
     biscuits,
     stars})=>{
     return (
-        <Link href={`../(tabs)/tripinfo/${location}`} asChild>
+        <Link href={`../(tabs)/tripinfo/${location}?trip_id=${trip_id}`} asChild>
             <TouchableOpacity className = {"ml-10 mr-2.5 border-2 border-white border-b-0 p-2 bg-pastel-orange"}
                               activeOpacity={0.6}>
                 <Text className={"text-lg font-pbold text-white"}>Trip to {location} - {distance} mi</Text>

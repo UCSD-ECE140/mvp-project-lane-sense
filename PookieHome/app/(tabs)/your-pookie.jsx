@@ -61,6 +61,14 @@ const YourPookie = (/* route */) => {
         setPookieData();
     }, []);
 
+    if (error) {
+        return (
+            <SafeAreaView>
+                <Text>{error}</Text>
+            </SafeAreaView>
+        )
+    }
+
     return (
         <ScrollView className={"bg-pastel-blue"}>
             <SafeAreaView>

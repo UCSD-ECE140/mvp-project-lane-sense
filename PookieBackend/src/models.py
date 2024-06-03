@@ -44,14 +44,11 @@ class RecentTripDetails(BaseModel):
     stars: int
 
 class TripDetails(BaseModel):
-    trip_id: int
     start_location: List[float]
     end_location: List[float]
-    status: str
-    location: str
-    distance: float
-    biscuits: int
     stars: int
+    trip_summary: str
+    location_updates: List[List[float]]
 
 class TripComplete(BaseModel):
     end_location: List[float]
