@@ -4,8 +4,8 @@ import { BleError, BleManager, Characteristic, Device } from 'react-native-ble-p
 import * as ExpoDevice from 'expo-device';
 import base64 from 'react-native-base64';
 
-const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
-const CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+const SERVICE_UUID = "91bad492-b950-4226-aa2b-4ede9fa42f59";
+const CHARACTERISTIC_UUID = "ca73b3ba-39f6-4ab3-91ae-186dc9577d99";
 
 interface BluetoothContextProps {
   requestPermissions(): Promise<boolean>;
