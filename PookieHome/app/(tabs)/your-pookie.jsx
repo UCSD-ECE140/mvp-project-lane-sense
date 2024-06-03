@@ -22,19 +22,6 @@ const YourPookie = (/* route */) => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchPookieData = async () => {
-            try {
-                return await fetchGetData('pookie/details');
-            } 
-            catch (error) {
-                if (error.message?.includes('401')) {
-                    setError('Please log in to view this page');
-                }
-                else {
-                    setError(`Error fetching profile data: ${error.message}`);
-                }
-            }
-        };
         const fetchRecentTrips = async () => {
             try {
                 return await fetchGetData('user/recent_trips');
@@ -48,25 +35,43 @@ const YourPookie = (/* route */) => {
                 }
             }
         };
-        const setPookieData = async () => {
-            console.log("Fetching pookie data");
-            let pookieData = await fetchPookieData();
-            console.log(pookieData);
-            setLevel(pookieData.level);
-            setPookieName(pookieData.pookie_name);
-            setXp(pookieData.xp);
-            let recentTripData = await fetchRecentTrips();
-            setTrips(recentTripData);
-        }
-        setPookieData();
+        const fetchPookieData = async () => {
+            try {
+                console.log("Fetching pookie data");
+                let pookieData = await fetchGetData('pookie/details');
+                console.log(pookieData);
+                setLevel(pookieData.level);
+                setPookieName(pookieData.pookie_name);
+                setXp(pookieData.xp);
+                let recentTripData = await fetchRecentTrips();
+                setTrips(recentTripData);
+            } 
+            catch (error) {
+                if (error.message?.includes('401')) {
+                    setError('Please log in to view this page');
+                }
+                else {
+                    setError(`Error fetching profile data: ${error.message}`);
+                }
+            }
+        };
+        fetchPookieData();
     }, []);
 
     if (error) {
         return (
-            <SafeAreaView>
+            <View className={"w-full h-full bg-pastel-blue"}>
                 <Text>{error}</Text>
-            </SafeAreaView>
-        )
+            </View>
+        );
+    }
+
+    if (!level || !pookieName || !xp || !trips) {
+        return (
+            <View className={"w-full h-full bg-pastel-blue"}>
+                <Text className={"font-pblack ml-auto mr-auto text-5xl mb-6 text-fuchsia-50"}>Loading...</Text>
+            </View>
+        );
     }
 
     return (
@@ -109,7 +114,7 @@ const YourPookie = (/* route */) => {
                 </View>
 
                 <View>
-                    <Text style={styles.text} className={"ml-2 mt-4 mb-4 text-3xl font-pbold text-white"}>Recent Trips:</Text>
+                    <Text className={"ml-2 mt-4 mb-4 text-3xl font-pbold text-white"}>Recent Trips:</Text>
                     <View>
                         {trips.map(trip => (
                             <Trip
@@ -128,34 +133,5 @@ const YourPookie = (/* route */) => {
 
     )
 }
-
-const styles = StyleSheet.create({
-    header: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        padding: 16,
-    },
-    connectButtonContainer: {
-        backgroundColor: '#6200ea', // Deep purple
-        borderRadius: 25,
-        padding: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        elevation: 5,
-    },
-    connectButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    text: {
-        textShadowColor: 'black',
-        textShadowOffset: { width: 0, height: 3 },
-        textShadowRadius: 4,
-    }
-});
 
 export default YourPookie;

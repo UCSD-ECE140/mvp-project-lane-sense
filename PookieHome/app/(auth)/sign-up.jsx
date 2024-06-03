@@ -16,11 +16,9 @@ const createUser = async (email, password, username) => {
         },
         body: JSON.stringify({email, password, username}),
     });
-
     if (!response.ok) {
         throw new Error("An error occurred while signing up");
     }
-``
     return await response.json();
 }
 

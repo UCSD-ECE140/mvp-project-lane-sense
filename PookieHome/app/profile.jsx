@@ -33,7 +33,7 @@ const Profile = () => {
     if (error) {
         return (
             <View style={styles.centerContainer}>
-                <Text>Error: {error}</Text>
+                <Text>{error}</Text>
                 <StatusBar style="auto" />
             </View>
         );

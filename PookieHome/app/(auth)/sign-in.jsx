@@ -16,11 +16,9 @@ const loginUser = async (email, password) => {
         },
         body: JSON.stringify({email, password}),
     });
-
     if (!response.ok) {
         throw new Error("An error occurred while signing in");
     }
-
     return await response.json();
 }
 
@@ -44,7 +42,7 @@ const SignIn = () => {
         await SecureStore.setItemAsync("token", token);
         console.log("token stored: ", await SecureStore.getItemAsync("token"));
         Alert.alert("Success", "You have successfully logged in");
-        router.replace("/profile");
+        router.navigate("/profile");
     }
 
 
