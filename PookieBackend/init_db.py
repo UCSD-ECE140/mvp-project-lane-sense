@@ -62,7 +62,7 @@ try:
             start_location POINT NOT NULL,
             end_location POINT NOT NULL,
             status ENUM('active', 'completed') DEFAULT 'active',
-            location VARCHAR(100) NULL DEFAULT '',
+            location VARCHAR(256) NULL DEFAULT '',
             distance FLOAT NULL DEFAULT 0.0,
             biscuits INT NULL DEFAULT 0,
             stars INT NULL DEFAULT 0,

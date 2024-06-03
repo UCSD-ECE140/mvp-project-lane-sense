@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse                  # Used for returning
 from fastapi.staticfiles import StaticFiles                 # Used for serving static files
 import uvicorn                                              # Used for running the app                                             
 
-from models import PookieDetails, RecentTripDetails, Token, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
+from models import PookieDetails, RecentTripDetails, Token, TripComplete, UserCreate, UserLogin, UserStats, TripDetails, TripCreate, LocationUpdate, FriendRequest, FriendResponse
 from pookie import pookie_details, update_pookie_details
 from security import verify_token
 from users import create_user, get_stats, login_user, update_user_stats
@@ -118,8 +118,8 @@ async def post_location_update(trip_id: int, location: LocationUpdate, user_id: 
 
 # Complete a trip
 @app.put("/trip/{trip_id}/complete", response_class=JSONResponse)
-async def put_trip_complete(trip_id: int, user_id: int = Depends(verify_token)):
-    message = complete_trip(trip_id)
+async def put_trip_complete(trip_id: int, tripComplete: TripComplete, user_id: int = Depends(verify_token)):
+    message = complete_trip(trip_id, tripComplete)
     return JSONResponse(content={"message": message})
 
 ### Friend Endpoints ###

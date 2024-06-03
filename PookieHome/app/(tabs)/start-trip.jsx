@@ -4,33 +4,36 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useBluetooth } from '../../BluetoothContext';
-import { fetchPostData } from '../../utils';
+import { fetchPostData, fetchPutData } from '../../utils';
 import CustomButton from '../../components/Custom Button';
 
-var locationUpdateURL = '';
-
 const StartTrip = () => {
-    const {
-        connectedDevice,
-        disconnectFromDevice,
-    } = useBluetooth();
+    const { connectedDevice, data, disconnectFromDevice } = useBluetooth();
     
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [tripId, setTripId] = useState(null);
     const [connectButtonText, setConnectButtonText] = useState("Connect to Pookie to Start Your Trip!");
     const [routeCoordinates, setRouteCoordinates] = useState([]); // Array to store the route coordinates
+    // Data from Pookie
+    const [harshTurns, setHarshTurns] = useState(0); // [1]
+    const [harshAccelerations, setHarshAccelerations] = useState(0); // [2]
+    const [harshBrakes, setHarshBrakes] = useState(0); // [3]
     
     const intervalId = useRef(null); // useRef to store the interval ID
+    const isComponentMounted = useRef(true);
 
-    useEffect(() => {
+    // Cleanup on component unmount
+    /* useEffect(() => {
         return () => {
+            isComponentMounted.current = false;
             // Clear interval when the component unmounts
             if (intervalId.current) {
                 clearInterval(intervalId.current);
             }
+            
         };
-    }, []);
+    }, []); */
 
     useEffect(() => {
         const getLocationAndUpdate = async () => {
@@ -50,23 +53,20 @@ const StartTrip = () => {
                 };
                 await fetchPostData(locationUpdateURL, body);
             } catch (error) {
-                setErrorMsg(`Error updating trip location: ${error.message}`);
+                if (isComponentMounted.current) {
+                    setErrorMsg(`Error updating trip location: ${error.message}`);
+                }
             }
         };
 
         const initTrip = async () => {
-            // Check if bluetooth device is connected
-            /* if (!connectedDevice) {
-                setErrorMsg('No Pookie device connected');
-                return;
-            } */
             // Check for location permissions
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 setErrorMsg('Permission to access location was denied');
                 return;
             }
-            // Get current location
+            // Get initial location
             let location = await Location.getCurrentPositionAsync({});
             setLocation(location);
             setRouteCoordinates([{
@@ -79,7 +79,6 @@ const StartTrip = () => {
                     start_location: [location.coords.latitude, location.coords.longitude],
                 };
                 let response = await fetchPostData('trip/create', body);
-                console.log(response);
                 setTripId(response.trip_id);
             } catch (error) {
                 setErrorMsg(`Error starting trip: ${error.message}`);
@@ -88,19 +87,12 @@ const StartTrip = () => {
             intervalId.current = setInterval(getLocationAndUpdate, 10 * 1000); // Update every 10 seconds
         };
 
-        if (!connectedDevice) {
-            setConnectButtonText("Connect to Pookie to Start Your Trip!");
-        } else {
+        if (connectedDevice) {
             setConnectButtonText("Connected to Pookie! Trip Started!");
             initTrip();
+        } else {
+            setConnectButtonText("Connect to Pookie to Start Your Trip!");
         }
-
-        // Cleanup interval when connectedDevice changes
-        return () => {
-            if (intervalId.current) {
-                clearInterval(intervalId.current);
-            }
-        };
     }, [connectedDevice]);
 
     useEffect(() => {
@@ -108,6 +100,14 @@ const StartTrip = () => {
             locationUpdateURL = `trip/${tripId}/location_update`;
         }
     }, [tripId]);
+
+    useEffect(() => {
+        if (data) {
+            setHarshTurns(data.harsh_turns);
+            setHarshAccelerations(data.harsh_accelerations);
+            setHarshBrakes(data.harsh_brakes);
+        }
+    }, [data]);
 
     const handleBTButton = () => {
         router.navigate('/connecting');
@@ -162,7 +162,30 @@ const StartTrip = () => {
                 />
             </MapView>
             <View style={styles.buttonContainer}>
-                <Button title="Stop Trip" onPress={() => router.back()} />
+                <Button title="Stop Trip" onPress={() => {
+                    clearInterval(intervalId.current);
+                    // Disconnect from Bluetooth device
+                    disconnectFromDevice();
+                    // Make a post request to the server to end the trip
+                    const endTrip = async () => {
+                        if (location) {
+                            try {
+                                let body = {
+                                    end_location: [location.coords.latitude, location.coords.longitude],
+                                    harsh_turns_made: harshTurns,
+                                    harsh_accelerations_made: harshAccelerations,
+                                    harsh_brakes_made: harshBrakes,
+                                };
+                                await fetchPutData(`trip/${tripId}/complete`, body);
+                            } catch (error) {
+                                console.log(error);
+                                setErrorMsg(`Error ending trip: ${error.message}`);
+                            }
+                        }
+                    };
+                    endTrip();
+                    router.back();
+                }} />
             </View>
         </View>
     );

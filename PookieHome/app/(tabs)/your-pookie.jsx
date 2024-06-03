@@ -64,9 +64,8 @@ const YourPookie = (/* route */) => {
     return (
         <ScrollView className={"bg-pastel-blue"}>
             <SafeAreaView>
-                
                 <View className="flex-col">
-                    <Text className={"font-pblack ml-auto mr-auto mt-10 text-5xl mb-6 text-fuchsia-50"}>{pookieName}</Text>
+                    <Text className={"font-pblack ml-auto mr-auto text-5xl mb-6 text-fuchsia-50"}>{pookieName}</Text>
                     <View className={"flex-row justify-start ml-auto mr-auto"}>
                         <Text className={"italic font-pmedium pr-2 text-fuchsia-50"}>Lvl. {level}</Text>
                         <LevelBar

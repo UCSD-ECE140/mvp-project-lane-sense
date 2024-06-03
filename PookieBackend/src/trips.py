@@ -1,8 +1,10 @@
 # This file contains the functions that interact with the database to get information about trips
+from typing import List
 from fastapi import HTTPException
 from models import LocationUpdate, TripComplete, TripCreate, TripDetails, UserStats
 from utils import get_db_connection
 from geopy import Nominatim
+from geopy.distance import geodesic
 
 import mysql.connector as mysql
 
@@ -202,29 +204,26 @@ def complete_trip(trip_id: int, tripComplete: TripComplete):
     cursor = conn.cursor()
     query = """
         UPDATE Trips
-        SET end_time = %s, end_location = POINT(%s, %s), status = 'completed',
-            location = %s, distance = %s, biscuits = %s, stars = %s
+        SET end_time = CURRENT_TIMESTAMP, end_location = POINT(%s, %s), location = %s, distance = %s, biscuits = %s, stars = %s, status = 'completed'
         WHERE trip_id = %s
     """
     try:
-        # take the end location from the request if it is provided
-        last_update = tripComplete.end_location
-        if last_update is None:
-            # otherwise, get the last location update from the database
-            last_update = last_location_update(trip_id)
-        # get a name of the location
-        lat = last_update.coordinates[0]
-        lon = last_update.coordinates[1]
+        # update the end location
+        lat = tripComplete.end_location[0]
+        lon = tripComplete.end_location[1]
+        # get the location name
         geolocator = Nominatim(user_agent="Pookie")
         location = geolocator.reverse((lat, lon), exactly_one=True).address
         # calculate distance, biscuits, and stars
-        distance = get_trip_distance(trip_id)
         # just giving one for now, will calculate properly later
+        distance = get_trip_distance(trip_id)
         biscuits = 1
         stars = 1 
+        print("Distance:", distance, "Biscuits:", biscuits, "Stars:", stars, "Location:", location)
         cursor.execute(query, (
-            last_update.timestamp, last_update.coordinates[0], last_update.coordinates[1],
-            location, distance, biscuits, stars,
+            lat, lon,
+            location, distance, biscuits, stars, 
+            trip_id
         ))
         conn.commit()
         # update the user's stats
@@ -236,25 +235,40 @@ def complete_trip(trip_id: int, tripComplete: TripComplete):
         update_user_stats(trip_id, tripComplete) """
         return "Trip completed successfully"
     except mysql.Error as e:
+        print(e)
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
     finally:
         cursor.close()
         conn.close()
 
+
+# Accumulate the distance of a trip by summing the distances between each pair of consecutive location updates
 def get_trip_distance(trip_id: int):
+    print("Calculating distance for trip", trip_id)
     conn = get_db_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Database connection failed")
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     query = """
-        SELECT ST_Distance_Sphere(start_location, end_location) AS distance
-        FROM Trips
+        SELECT ST_X(location) as lat, ST_Y(location) as lon
+        FROM location_updates
         WHERE trip_id = %s
+        ORDER BY timestamp
     """
     try:
         cursor.execute(query, (trip_id,))
-        distance = cursor.fetchone()
-        return distance[0]
+        locations = cursor.fetchall()
+        print("Locations:", locations)
+        if len(locations) < 2:
+            return 0
+        distance = 0
+        for i in range(1, len(locations)):
+            start = (locations[i-1]['lat'], locations[i-1]['lon'])
+            end = (locations[i]['lat'], locations[i]['lon'])
+            distance += geodesic(start, end).meters
+        distance_in_miles = distance * 0.000621371;
+        print("Distance in miles:", distance_in_miles)
+        return distance_in_miles
     except mysql.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {e}")
     finally:

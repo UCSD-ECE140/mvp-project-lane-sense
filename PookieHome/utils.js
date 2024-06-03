@@ -39,3 +39,23 @@ export const fetchPostData = async (endpoint, body) => {
     const data = await response.json();
     return data;
 }
+
+export const fetchPutData = async (endpoint, body) => {
+    const token = await SecureStore.getItemAsync('token'); // Retrieve token from secure store
+    if (!token) {
+        throw new Error('No token found');
+    }
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/${endpoint}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+}
