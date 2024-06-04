@@ -1,8 +1,7 @@
-import { StatusBar, Alert } from 'react-native';
+import { StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as SecureStore from 'expo-secure-store';
 import CustomButton from '../components/Custom Button';
 import { router } from 'expo-router';
 import { fetchGetData } from '../utils';

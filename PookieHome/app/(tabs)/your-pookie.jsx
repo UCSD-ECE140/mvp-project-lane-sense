@@ -1,19 +1,13 @@
-import { View, Text, ScrollView, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, Image } from 'react-native';
 import { useEffect, useState } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
 import LevelBar from "../../components/levelbar";
 import Trip from "../../components/Trip";
 import CustomButton from "../../components/Custom Button";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { fetchGetData } from '../../utils';
-import { useBluetooth } from '../../BluetoothContext';
 
-const YourPookie = (/* route */) => {
-    // const { level, pookieName, xp, trips } = route.params;
-    const {
-        connectedDevice,
-    } = useBluetooth();
+const YourPookie = () => {
 
     const [level, setLevel] = useState(0);
     const [pookieName, setPookieName] = useState("");
