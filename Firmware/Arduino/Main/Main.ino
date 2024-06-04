@@ -9,6 +9,9 @@
 #include <Arduino_GFX_Library.h>
 #include "graphics.c"
 
+#include "SoundData.h"
+#include "XT_DAC_Audio.h"
+
 #include "BluetoothSerial.h"
 #include <BLEDevice.h>
 #include <BLEServer.h>
@@ -36,6 +39,13 @@ const int greenPin = 26;
 unsigned int harshAccelerationCount = 0;
 unsigned int harshBrakingCount = 0;
 unsigned int harshTurningCount = 0;
+
+
+//Display Initializer
+#define GFX_BL 15  //backlight pin
+Arduino_DataBus *bus = new Arduino_ESP32SPI(4 /* DC */, 15 /* CS */, 17 /* SCK */, 16 /* MOSI */, 5 /* MISO */);
+Arduino_GFX *gfx = new Arduino_ILI9488_18bit(bus, 2 /* RST /, 1 / rotation */, false /* IPS */);
+
 
 // BLE Characteristic and Descriptor
 BLECharacteristic harshEventsCharacteristic(HARSH_EVENTS_CHAR_UUID, BLECharacteristic::PROPERTY_NOTIFY);
@@ -77,7 +87,7 @@ void setup() {
 
       gfx->setCursor(10, 10);
       gfx->setTextColor(RED);
-      gfx->println("Set Done")
+      gfx->println("Set Done");
 
   neutral_screen();
 
@@ -197,6 +207,7 @@ void loop() {
 
 void sendHarshEventCounts() {
   mad_screen();
+  playSpeaker(bad_sound);
   char harshEventCounts[50];
   snprintf(harshEventCounts, sizeof(harshEventCounts), "{\"harsh_turns\": %d, \"harsh_brakes\": %d, \"harsh_accelerations\": %d}", harshTurningCount, harshBrakingCount, harshAccelerationCount);
   harshEventsCharacteristic.setValue(harshEventCounts);
