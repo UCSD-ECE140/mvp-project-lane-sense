@@ -31,13 +31,11 @@ const SignUp = () => {
     const submit = async () => {
         if (form.username === "" || form.email === "" || form.password === "") {
             Alert.alert("Error", "Please fill in all fields");
+            return;
         }
-
         setSubmitting(true);
         try {
             const result = await createUser(form.email, form.password, form.username);
-            //setUser(result);
-            //setIsLogged(true);
             console.log(result);
             router.navigate("/sign-in");
         } catch (error) {

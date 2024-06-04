@@ -35,14 +35,23 @@ const SignIn = () => {
             Alert.alert("Error", "Please fill in all fields");
             return;
         }
-        let result = await loginUser(form.email, form.password);
-        // login result should have {"access_token": access_token, "token_type": "bearer"}
-        let token = result.access_token;
-        // store
-        await SecureStore.setItemAsync("token", token);
-        console.log("token stored: ", await SecureStore.getItemAsync("token"));
-        Alert.alert("Success", "You have successfully logged in");
-        router.navigate("/profile");
+        setIsSubmitting(true);
+        try {
+            let result = await loginUser(form.email, form.password);
+            // login result should have {"access_token": access_token, "token_type": "bearer"}
+            let token = result.access_token;
+            // store
+            await SecureStore.setItemAsync("token", token);
+            console.log("token stored: ", await SecureStore.getItemAsync("token"));
+            Alert.alert("Success", "You have successfully logged in");
+            router.navigate("/profile");
+        }
+        catch (error) {
+            Alert.alert("Error", error.message);
+        }
+        finally {
+            setIsSubmitting(false);
+        }
     }
 
 
