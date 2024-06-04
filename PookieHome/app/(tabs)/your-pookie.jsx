@@ -60,7 +60,7 @@ const YourPookie = () => {
         );
     }
 
-    if (!level || !pookieName || !xp || !trips) {
+    if (!pookieName || !trips) {
         return (
             <View className={"w-full h-full bg-pastel-blue"}>
                 <Text className={"font-pblack ml-auto mr-auto mt-auto mb-auto text-5xl text-fuchsia-50"}>Loading...</Text>

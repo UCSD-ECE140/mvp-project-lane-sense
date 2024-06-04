@@ -179,8 +179,9 @@ const StartTrip = () => {
                     const endTrip = async () => {
                         if (location) {
                             try {
+                                let current_location = await Location.getCurrentPositionAsync({});
                                 let body = {
-                                    end_location: [location.coords.latitude, location.coords.longitude],
+                                    end_location: [current_location.coords.latitude, current_location.coords.longitude],
                                     harsh_turns_made: harshTurns,
                                     harsh_accelerations_made: harshAccelerations,
                                     harsh_brakes_made: harshBrakes,

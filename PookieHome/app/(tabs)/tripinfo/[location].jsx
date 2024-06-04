@@ -1,5 +1,5 @@
 import { ScrollView, Text, View } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGlobalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, Polyline } from 'react-native-maps';
@@ -63,8 +63,8 @@ const Location = () => {
                                 initialRegion={{
                                     latitude: startLocation[0],
                                     longitude: startLocation[1],
-                                    latitudeDelta: 0.1,
-                                    longitudeDelta: 0.1,
+                                    latitudeDelta: 0.05,
+                                    longitudeDelta: 0.05,
                                 }}>
                                 <Marker
                                     coordinate={{ latitude: startLocation[0], longitude: startLocation[1] }}
@@ -76,8 +76,8 @@ const Location = () => {
                                 />
                                 <Polyline
                                     coordinates={polylineCoordinates}
-                                    strokeColor="#FF0000"
-                                    strokeWidth={2}
+                                    strokeColor="blue"
+                                    strokeWidth={5}
                                 />
                             </MapView>
                         )}
