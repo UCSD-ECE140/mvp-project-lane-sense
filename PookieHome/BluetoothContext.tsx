@@ -91,7 +91,7 @@ export const BluetoothProvider: FC<{ children: ReactNode }> = ({ children }) => 
         console.error(error);
         return;
       }
-      if (device /* && device.name?.includes("Pookie") */) {
+      if (device && device.name?.includes("Pookie")) {
         setAllDevices((prevState) => {
           if (!isDuplicateDevice(prevState, device)) {
             return [...prevState, device];

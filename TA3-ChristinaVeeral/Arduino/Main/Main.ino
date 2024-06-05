@@ -16,9 +16,9 @@ bool deviceConnected = false;
 // UUIDs for the characteristics
 #define HARSH_EVENTS_CHAR_UUID "ca73b3ba-39f6-4ab3-91ae-186dc9577d99"
 
-const float accelerationThreshold = 3.0;
+const float accelerationThreshold = 1.0;
 const float brakingThreshold = -3.0;
-const float turningThreshold = 30.0;
+const float turningThreshold = 5.0;
 const unsigned long durationThreshold = 500;
 unsigned long accelerationStartTime = 0;
 unsigned long brakingStartTime = 0;
@@ -148,7 +148,6 @@ void loop() {
         brakingStartTime = 0;
       }
 
-
       // Check for harsh turning
       if (abs(gyroZ) > turningThreshold) {
         if (turningStartTime == 0) {
@@ -169,8 +168,8 @@ void loop() {
 }
 
 void sendHarshEventCounts() {
-  char harshEventCounts[50];
-  snprintf(harshEventCounts, sizeof(harshEventCounts), "{\"harsh_turns\": %d, \"harsh_brakes\": %d, \"harsh_accelerations\": %d}", harshTurningCount, harshBrakingCount, harshAccelerationCount);
+  char harshEventCounts[150];
+  snprintf(harshEventCounts, sizeof(harshEventCounts), "%d %d %d", harshTurningCount, harshBrakingCount, harshAccelerationCount);
   harshEventsCharacteristic.setValue(harshEventCounts);
   harshEventsCharacteristic.notify();
 }

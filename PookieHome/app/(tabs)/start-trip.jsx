@@ -111,9 +111,14 @@ const StartTrip = () => {
     useEffect(() => {
         if (data) {
             console.log("Received data from Pookie:", data);
-            setHarshTurns(data.harsh_turns);
-            setHarshAccelerations(data.harsh_accelerations);
-            setHarshBrakes(data.harsh_brakes);
+            console.log("Type of data:", typeof data);
+            let parsedData = data.split(' ');
+            let harshTurns = parseInt(parsedData[0]);
+            let harshAccelerations = parseInt(parsedData[1]);
+            let harshBrakes = parseInt(parsedData[2]);
+            setHarshTurns(harshTurns);
+            setHarshAccelerations(harshAccelerations);
+            setHarshBrakes(harshBrakes);
         }
     }, [data]);
 
