@@ -1,33 +1,39 @@
 import { StatusBar } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CustomButton from '../components/Custom Button';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { fetchGetData } from '../utils';
 
 const Profile = () => {
     const [profileData, setProfileData] = useState(null);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchProfileData = async () => {
-            try {
-                let profileData = await fetchGetData('user/stats');
-                console.log(profileData);
-                setProfileData(profileData);
-            } 
-            catch (error) {
-                if (error.message?.includes('401')) {
-                    setError('Please log in to view this page');
+    useFocusEffect(
+        useCallback(() => {
+            const fetchProfileData = async () => {
+                try {
+                    let profileData = await fetchGetData('user/stats');
+                    console.log(profileData);
+                    setProfileData(profileData);
+                } 
+                catch (error) {
+                    if (error.message?.includes('401')) {
+                        setError('Please log in to view this page');
+                    }
+                    else {
+                        setError(`Error fetching profile data: ${error.message}`);
+                    }
                 }
-                else {
-                    setError(`Error fetching profile data: ${error.message}`);
-                }
+            };
+            fetchProfileData();
+            return () => {
+                setProfileData(null);
+                setError(null);
             }
-        };
-        fetchProfileData();
-    }, []);
+        }, [])
+    );
 
     if (error) {
         return (

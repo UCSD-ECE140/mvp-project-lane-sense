@@ -1,10 +1,10 @@
 import { View, Text, ScrollView, Image } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
 import LevelBar from "../../components/levelbar";
 import Trip from "../../components/Trip";
 import CustomButton from "../../components/Custom Button";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { fetchGetData } from '../../utils';
 
 const YourPookie = () => {
@@ -15,42 +15,51 @@ const YourPookie = () => {
     const [trips, setTrips] = useState([]);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchRecentTrips = async () => {
-            try {
-                return await fetchGetData('user/recent_trips');
-            } 
-            catch (error) {
-                if (error.message?.includes('401')) {
-                    setError('Please log in to view this page');
+    useFocusEffect(
+        useCallback(() => {
+            const fetchRecentTrips = async () => {
+                try {
+                    return await fetchGetData('user/recent_trips');
+                } 
+                catch (error) {
+                    if (error.message?.includes('401')) {
+                        setError('Please log in to view this page');
+                    }
+                    else {
+                        setError(`Error fetching profile data: ${error.message}`);
+                    }
                 }
-                else {
-                    setError(`Error fetching profile data: ${error.message}`);
+            };
+            const fetchPookieData = async () => {
+                try {
+                    console.log("Fetching pookie data");
+                    let pookieData = await fetchGetData('pookie/details');
+                    console.log(pookieData);
+                    setLevel(pookieData.level);
+                    setPookieName(pookieData.pookie_name);
+                    setXp(pookieData.xp);
+                    let recentTripData = await fetchRecentTrips();
+                    setTrips(recentTripData);
+                } 
+                catch (error) {
+                    if (error.message?.includes('401')) {
+                        setError('Please log in to view this page');
+                    }
+                    else {
+                        setError(`Error fetching profile data: ${error.message}`);
+                    }
                 }
+            };
+            fetchPookieData();
+            return () => {
+                setLevel(0);
+                setPookieName("");
+                setXp(0);
+                setTrips([]);
+                setError(null);
             }
-        };
-        const fetchPookieData = async () => {
-            try {
-                console.log("Fetching pookie data");
-                let pookieData = await fetchGetData('pookie/details');
-                console.log(pookieData);
-                setLevel(pookieData.level);
-                setPookieName(pookieData.pookie_name);
-                setXp(pookieData.xp);
-                let recentTripData = await fetchRecentTrips();
-                setTrips(recentTripData);
-            } 
-            catch (error) {
-                if (error.message?.includes('401')) {
-                    setError('Please log in to view this page');
-                }
-                else {
-                    setError(`Error fetching profile data: ${error.message}`);
-                }
-            }
-        };
-        fetchPookieData();
-    }, []);
+        }, [])
+    );
 
     if (error) {
         return (
