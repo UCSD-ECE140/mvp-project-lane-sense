@@ -243,6 +243,8 @@ def complete_trip(trip_id: int, tripComplete: TripComplete, user_id: int):
 
 # Calculate the biscuits and stars for a trip based on the distance and faults
 def calculate_trip_result(distance: float, harsh_turns: int, harsh_brakes: int, harsh_accelerations: int):
+    # to avoid division by zero
+    distance = max(1, distance)
     x = 10
     harsh_actions_per_x_miles = harsh_turns + harsh_brakes + harsh_accelerations / (distance / x)
     if harsh_actions_per_x_miles <= 3:
