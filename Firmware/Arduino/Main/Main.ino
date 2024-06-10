@@ -9,8 +9,10 @@
 #include <Arduino_GFX_Library.h>
 #include "graphics.c"
 
-#include "SoundData.h"
-#include "XT_DAC_Audio.h"
+#include "Arduino.h"
+#include "Audio.h"
+#include "SD.h"
+#include "SPI.h"
 
 #include "BluetoothSerial.h"
 #include <BLEDevice.h>
@@ -25,10 +27,22 @@ bool deviceConnected = false;
 // UUIDs for the characteristics
 #define HARSH_EVENTS_CHAR_UUID "ca73b3ba-39f6-4ab3-91ae-186dc9577d99"
 
+// SD card pin definitions
+#define SD_CS         19   
+#define SPI_MOSI      16  
+#define SPI_MISO      18  
+#define SPI_SCK       17   
+
+// DAC pins for audio output
+#define DAC_PIN1      25   // GPIO25 corresponds to DAC1
+#define DAC_PIN2      26   // GPIO26 corresponds to DAC2 (optional, if you want stereo)
+
 const float accelerationThreshold = 3.0;
 const float brakingThreshold = -3.0;
 const float turningThreshold = 30.0;
 const unsigned long durationThreshold = 500;
+const float faceChangeThreshold = 5;
+float faceTime = 0;
 unsigned long accelerationStartTime = 0;
 unsigned long brakingStartTime = 0;
 unsigned long turningStartTime = 0;
@@ -40,6 +54,8 @@ unsigned int harshAccelerationCount = 0;
 unsigned int harshBrakingCount = 0;
 unsigned int harshTurningCount = 0;
 
+int current_state = -1;
+int previous_state = -1;
 
 //Display Initializer
 #define GFX_BL 15  //backlight pin
@@ -70,6 +86,11 @@ void setup() {
    Wire.begin(21, 22);
    pinMode(redPin, OUTPUT);
    pinMode(greenPin, OUTPUT);
+   pinMode(SD_CS, OUTPUT);
+   pinMode(GFX_BL, OUTPUT);
+   
+   //setup_audio();
+   //setup_SD();
 
   //initialize display
     #ifdef GFX_EXTRA_PRE_INIT
@@ -126,7 +147,13 @@ void setup() {
 }
 
 void loop() {
-  neutral_screen();
+  unsigned long currentTime = millis();
+  
+  if(current_state != 1 && currentTime - faceTime >= faceChangeThreshold){
+      neutral_screen();
+      current_state = 1;
+      faceTime = currentTime;
+  }
   if (deviceConnected) {
     if (mpu.update()) {
       // Update the sensor readings
@@ -156,7 +183,6 @@ void loop() {
       float linearAccX = mpu.getLinearAccX();
       float linearAccY = mpu.getLinearAccY();
       float linearAccZ = mpu.getLinearAccZ();
-      unsigned long currentTime = millis();
       float gyroZ = mpu.getGyroZ();
 
       // Check for harsh acceleration
@@ -206,10 +232,14 @@ void loop() {
 }
 
 void sendHarshEventCounts() {
-  mad_screen();
-  playSpeaker(bad_sound);
+  if(current_state != 0){
+    mad_screen();
+    current_state = 0;
+  }
+
+  //play_audio("mp3/0001.mp3");
   char harshEventCounts[50];
-  snprintf(harshEventCounts, sizeof(harshEventCounts), "{\"harsh_turns\": %d, \"harsh_brakes\": %d, \"harsh_accelerations\": %d}", harshTurningCount, harshBrakingCount, harshAccelerationCount);
+  snprintf(harshEventCounts, sizeof(harshEventCounts), "%d %d %d", harshTurningCount, harshBrakingCount, harshAccelerationCount);
   harshEventsCharacteristic.setValue(harshEventCounts);
   harshEventsCharacteristic.notify();
 }
